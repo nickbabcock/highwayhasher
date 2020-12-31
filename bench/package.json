@@ -1,0 +1,12 @@
+{
+  "name": "bench",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "Nick Babcock",
+  "license": "MIT",
+  "dependencies": {
+    "highwayhash": "^3.0.0"
+  }
+}

@@ -48,7 +48,6 @@
     "@napi-rs/cli": "^1.0.0",
     "@rollup/plugin-typescript": "^8.1.0",
     "@rollup/plugin-wasm": "^5.1.2",
-    "highwayhash": "^3.0.0",
     "jest": "^26.6.0",
     "karmatic": "^2.1.0",
     "puppeteer": "^5.4.0",

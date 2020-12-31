@@ -1,0 +1,60 @@
+{
+  "name": "highwayhasher",
+  "version": "0.1.0",
+  "description": "HighwayHash implementation for both server and browser side",
+  "main": "./dist/node/cjs/index_node.js",
+  "module": "./dist/node/es/index_node.js",
+  "browser": {
+    "./dist/node/cjs/index_node.js": "./dist/browser/cjs/index_browser.js",
+    "./dist/node/es/index_node.js": "./dist/browser/es/index_browser.js"
+  },
+  "types": "./dist/browser/es/index_browser.d.ts",
+  "scripts": {
+    "build": "npm run build:native && npm run build:web && rm -rf dist/ && rollup -c && cp ./native/*.node ./dist/node/cjs/. && cp ./native/*.node ./dist/node/es/.",
+    "build:native": "cd native && cargo build --release && napi build -c ../package.json --platform --release",
+    "build:web": "wasm-pack build -t web --out-dir ../src/web web",
+    "pretest": "npm run build",
+    "test": "npm run test:native && npm run test:web && npm run test:types",
+    "test:types": "tsc --noEmit test/usage.ts",
+    "test:native": "jest",
+    "test:web": "karmatic 'test/**/*.js'",
+    "prepublishOnly": "npm test"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "napi": {
+    "name": "highwayhasher",
+    "triples": {
+      "defaults": true
+    }
+  },
+  "jest": {
+    "testRegex": "./test/.*.js$",
+    "testEnvironment": "node"
+  },
+  "keywords": [
+    "highwayhash",
+    "hash",
+    "crypto",
+    "wasm"
+  ],
+  "author": "Nick Babcock",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@napi-rs/cli": "^1.0.0",
+    "@rollup/plugin-typescript": "^8.1.0",
+    "@rollup/plugin-wasm": "^5.1.2",
+    "highwayhash": "^3.0.0",
+    "jest": "^26.6.0",
+    "karmatic": "^2.1.0",
+    "puppeteer": "^5.4.0",
+    "rollup": "^2.35.1",
+    "tslib": "^2.0.3",
+    "typescript": "^4.1.3",
+    "webpack": "^4.44.2"
+  }
+}

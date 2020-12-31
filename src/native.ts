@@ -1,9 +1,20 @@
 import type { HashCreator, IHash } from "./model";
 import { platform, arch } from "os";
 
+const getAbi = (platform: string): string => {
+  switch (platform) {
+    case "linux":
+      return "-gnu";
+    case "win32":
+      return "-msvc";
+    default:
+      return ""
+  }
+}
+
 const MODULE_NAME = "highwayhasher";
 const PLATFORM = platform();
-const ABI = PLATFORM === "linux" ? "-gnu" : "";
+const ABI = getAbi(PLATFORM);
 const { createHighwayClass } = require(`./${MODULE_NAME}.${PLATFORM}-${arch()}${ABI}.node`);
 const InternalHasher = createHighwayClass();
 

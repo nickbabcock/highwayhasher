@@ -1,0 +1,26 @@
+{
+  "name": "verifier",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest && karmatic 'test/hash.test.js'",
+    "pretest": "node pre.js"
+  },
+  "keywords": [],
+  "author": "Nick Babcock",
+  "license": "MIT",
+  "jest": {
+    "testRegex": "./test/.*.js$",
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "jest": "^26.6.0",
+    "highwayhasher": "*"
+  },
+  "devDependencies": {
+    "karmatic": "^2.1.0",
+    "puppeteer": "^5.5.0",
+    "webpack": "^5.11.1"
+  }
+}

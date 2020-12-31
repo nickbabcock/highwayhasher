@@ -1,0 +1,1 @@
+Directory tests to ensure that what is uploaded to npm works

@@ -9,6 +9,7 @@
     "./dist/node/es/index_node.js": "./dist/browser/es/index_browser.js"
   },
   "types": "./dist/browser/es/index_browser.d.ts",
+  "files": ["dist"],
   "scripts": {
     "build": "npm run build:native && npm run build:web && rm -rf dist/ && rollup -c && cp ./native/*.node ./dist/node/cjs/. && cp ./native/*.node ./dist/node/es/.",
     "build:native": "cd native && cargo build --release && napi build -c ../package.json --platform --release",
@@ -17,7 +18,7 @@
     "test": "npm run test:native && npm run test:types",
     "test:types": "tsc --noEmit test/usage.ts",
     "test:native": "jest",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test && ./assets/download-releases.sh"
   },
   "os": [
     "darwin",

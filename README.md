@@ -71,9 +71,11 @@ node index.js
 
 After running you will see output like:
 
-> hashing data of size: 10000000
-> hash native 1.38ms
-> hash wasm 18.46ms
-> 3rd party 2.60ms
+```
+hashing data of size: 10000000
+hash native 1.38ms
+hash wasm 18.46ms
+3rd party 2.60ms
+```
 
 Here you can see that the native highwayhasher hashes at 7.25 GB/s and the other npm highwayhash implementation hashes at 3.85 GB/s

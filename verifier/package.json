@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest && karmatic 'test/hash.test.js'",
+    "test": "jest && karmatic test/hash.test.js",
     "pretest": "node pre.js"
   },
   "keywords": [],

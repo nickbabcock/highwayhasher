@@ -60,3 +60,46 @@ jobs:
         path: dist/node/highwayhasher*.node
         name: ${{ env.ARTIFACT_NAME }}
         if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/download-artifact@v2
+      with:
+        path: artifacts-temp
+    - name: Flatten artifacts
+      run: |
+        mkdir artifacts
+        find artifacts-temp -type f -exec cp '{}' artifacts/ \;
+        ls -lR artifacts
+    - name: Create Release
+      if: github.event_name == 'release' && github.event.action == 'created'
+      uses: actions/github-script@v2
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN}}
+        script: |
+          console.log('environment', process.versions);
+          const fs = require('fs').promises;
+          const { repo: { owner, repo }, sha } = context;
+          console.log({ owner, repo, sha });
+          const release = await github.repos.createRelease({
+            owner, repo,
+            tag_name: process.env.GITHUB_REF,
+            draft: true,
+            target_commitish: sha
+          });
+
+          console.log('created release', { release });
+
+          for (let file of await fs.readdir('artifacts')) {
+            console.log('uploading', file);
+
+            await github.repos.uploadReleaseAsset({
+              owner, repo,
+              release_id: release.data.id,
+              name: file,
+              data: await fs.readFile(`artifacts/${file}`)
+            });
+          }

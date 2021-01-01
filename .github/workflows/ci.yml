@@ -50,7 +50,12 @@ jobs:
         npm test
       env:
         CI: true
+    - name: Set artifact name
+      shell: bash
+      run: |
+        echo "ARTIFACT_NAME=$(echo dist/node/cjs/highwayhasher*.node)" >> $GITHUB_ENV
     - uses: actions/upload-artifact@v2
       with:
         path: dist/node/cjs/highwayhasher*.node
+        name: ${{ env.ARTIFACT_NAME }}"
         if-no-files-found: error

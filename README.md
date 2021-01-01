@@ -48,7 +48,7 @@ That's it! Now your program will use native code on nodejs and Wasm in the brows
 Since Wasm is cross platform, one can drop any reliance on native dependencies by opting to only use the Wasm implementation
 
 ```js
-const { WasmHasher: HighwayHash } = require("highwayhasher");
+const { WasmHighwayHash: HighwayHash } = require("highwayhasher");
 const keyData = Uint8Array.from(new Array(32).fill(1));
 const hash = await HighwayHash.load(keyData);
 hash.append(Uint8Array.from([0]));

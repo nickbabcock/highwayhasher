@@ -1,0 +1,40 @@
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches:
+    - master
+  schedule:
+  - cron: '00 01 * * *'
+
+jobs:
+  verify:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build:
+        - win
+        - macos
+        - linux
+        include:
+        - build: win
+          os: windows-latest
+        - build: macos
+          os: macos-latest
+        - build: linux
+          os: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - name: verifier test
+      working-directory: ./verifier
+      run: |
+        npm install
+        npm test
+      env:
+        CI: true

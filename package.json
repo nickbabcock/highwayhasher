@@ -1,7 +1,11 @@
 {
   "name": "highwayhasher",
-  "version": "0.1.0",
-  "description": "HighwayHash implementation for both server and browser side",
+  "version": "0.0.1",
+  "description": "HighwayHash implementation for both node and browsers",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/nickbabcock/highwayhasher.git"
+  },
   "main": "./dist/node/cjs/index_node.js",
   "module": "./dist/node/es/index_node.js",
   "browser": {
@@ -41,7 +45,7 @@
     "crypto",
     "wasm"
   ],
-  "author": "Nick Babcock",
+  "author": "Nick Babcock <nbabcock19@hotmail.com>",
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {

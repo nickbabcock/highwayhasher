@@ -44,7 +44,7 @@ jobs:
       env:
         CI: true
     - name: browser test
-      working-directory: ./frontend
+      working-directory: ./e2e
       run: |
         npm install
         npm test

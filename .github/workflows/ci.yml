@@ -57,5 +57,5 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         path: dist/node/cjs/highwayhasher*.node
-        name: ${{ env.ARTIFACT_NAME }}"
+        name: ${{ env.ARTIFACT_NAME }}
         if-no-files-found: error

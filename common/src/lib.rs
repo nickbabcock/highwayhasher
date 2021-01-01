@@ -1,13 +1,9 @@
 pub fn data_to_lanes(d: &[u8]) -> [u64; 4] {
-    debug_assert!(d.len() >= std::mem::size_of::<[u64; 4]>());
-    unsafe {
-        [
-            (d.as_ptr().offset(0) as *const u64).read_unaligned(),
-            (d.as_ptr().offset(8) as *const u64).read_unaligned(),
-            (d.as_ptr().offset(16) as *const u64).read_unaligned(),
-            (d.as_ptr().offset(24) as *const u64).read_unaligned(),
-        ]
+    let mut result = [0u64; 4];
+    for (i, x) in d.chunks_exact(8).take(result.len()).enumerate() {
+        result[i] = u64::from_le_bytes([x[0], x[1], x[2], x[3], x[4], x[5], x[6], x[7]]);
     }
+    result
 }
 
 pub fn u64_slice_to_u8(hash: &[u64]) -> Vec<u8> {

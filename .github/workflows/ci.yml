@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+    - master
+  schedule:
+  - cron: '00 01 * * *'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build:
+        - win-msvc
+        - macos
+        - linux-gnu
+        include:
+        - build: win-msvc
+          os: windows-latest
+          target: x86_64-pc-windows-msvc
+        - build: macos
+          os: macos-latest
+          target: x86_64-apple-darwin
+        - build: linux-gnu
+          os: ubuntu-latest
+          target: x86_64-unknown-linux-gnu        
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - name: Install wasm-pack
+      run:  curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh 
+    - name: npm install, build, and test
+      run: |
+        npm install
+        npm run build --if-present
+        npm test
+      env:
+        CI: true
+    - name: browser test
+      working-directory: ./frontend
+      run: |
+        npm install
+        npm test
+      env:
+        CI: true

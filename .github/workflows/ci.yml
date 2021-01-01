@@ -50,3 +50,7 @@ jobs:
         npm test
       env:
         CI: true
+    - uses: actions/upload-artifact@v2
+      with:
+        path: dist/node/cjs/highwayhasher*.node
+        if-no-files-found: error

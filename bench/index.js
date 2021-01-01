@@ -40,7 +40,7 @@ function timeIt(name, fn) {
 
   // first: a warmup round
   for (let index = 0; index < inputs.length; index++) {
-    console.log(`hashing date of size: ${inputs[index]}`);
+    console.log(`hashing data of size: ${inputs[index]}`);
     const data = Buffer.alloc(inputs[index], 1);
     const native = nativeMod.create(key);
     native.append(data);
@@ -55,7 +55,7 @@ function timeIt(name, fn) {
 
   // then record actual timings
   for (let index = 0; index < inputs.length; index++) {
-    console.log(`hashing date of size: ${inputs[index]}`);
+    console.log(`hashing data of size: ${inputs[index]}`);
     const data = Buffer.alloc(inputs[index], 1);
 
     const nativeRes = timeIt("hash native", () => {

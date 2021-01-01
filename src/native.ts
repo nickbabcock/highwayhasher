@@ -15,7 +15,7 @@ const getAbi = (platform: string): string => {
 const MODULE_NAME = "highwayhasher";
 const PLATFORM = platform();
 const ABI = getAbi(PLATFORM);
-const { createHighwayClass } = require(`./${MODULE_NAME}.${PLATFORM}-${arch()}${ABI}.node`);
+const { createHighwayClass } = require(`../${MODULE_NAME}.${PLATFORM}-${arch()}${ABI}.node`);
 const InternalHasher = createHighwayClass();
 
 class NativeHash implements IHash {

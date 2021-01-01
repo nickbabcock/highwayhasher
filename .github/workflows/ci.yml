@@ -52,11 +52,11 @@ jobs:
         CI: true
     - name: Set artifact name
       shell: bash
-      working-directory: dist/node/cjs
+      working-directory: dist/node
       run: |
         echo "ARTIFACT_NAME=$(echo highwayhasher*.node)" >> $GITHUB_ENV
     - uses: actions/upload-artifact@v2
       with:
-        path: dist/node/cjs/highwayhasher*.node
+        path: dist/node/highwayhasher*.node
         name: ${{ env.ARTIFACT_NAME }}
         if-no-files-found: error

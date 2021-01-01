@@ -1,7 +1,5 @@
 # HighwayHasher
 
-**CAVEAT**: This library will soon be published
-
 HighwayHasher is JS bindings to the [Rust implementation](https://github.com/nickbabcock/highway-rs) of [Google's HighwayHash](https://github.com/google/highwayhash), a fast, keyed and strong hash function.
 
 ## Features

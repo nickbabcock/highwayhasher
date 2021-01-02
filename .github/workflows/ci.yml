@@ -3,8 +3,8 @@ name: CI
 on:
   pull_request:
   push:
-    branches:
-    - master
+    branches: ['master']
+    tags: ['v*']
   schedule:
   - cron: '00 01 * * *'
 

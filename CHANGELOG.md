@@ -1,3 +1,8 @@
+## v0.0.4 - 2021-01-02
+
+- Up to a 1.5x throughput increase when hashing in Wasm
+- Up to a 1.5x throughput with linux native build
+
 ## v0.0.3 - 2021-01-01
 
 Significant reduction in package size from 4MB to under 1MB

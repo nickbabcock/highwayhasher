@@ -25,7 +25,7 @@ jobs:
           os: macos-latest
           target: x86_64-apple-darwin
         - build: linux-gnu
-          os: ubuntu-latest
+          os: ubuntu-20.04
           target: x86_64-unknown-linux-gnu        
 
     steps:

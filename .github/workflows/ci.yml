@@ -78,7 +78,7 @@ jobs:
         find artifacts-temp -type f -exec cp '{}' artifacts/ \;
         ls -lR artifacts
     - name: Create Release
-      if: github.event_name == 'release' && github.event.action == 'created'
+      if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
       uses: actions/github-script@v2
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}

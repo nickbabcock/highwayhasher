@@ -50,6 +50,9 @@ jobs:
         npm test
       env:
         CI: true
+    - name: strip linux builds
+      if: matrix.build == 'linux-gnu'
+      run: strip dist/node/*.node
     - name: Set artifact name
       shell: bash
       working-directory: dist/node

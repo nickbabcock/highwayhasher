@@ -4,11 +4,18 @@ const { assert } = require("console");
 
 const key = Buffer.alloc(32, 1);
 
-function timeIt(name, fn) {
+function timeIt(name, dataLen, fn) {
+  const iterations = Math.min(Math.max(1000000 / dataLen, 5), 10000);
   const start = process.hrtime.bigint();
-  const res = fn();
+  let res;
+  for (let i = 0; i < iterations; i++) {
+    res = fn();
+  }
   const end = process.hrtime.bigint();
-  console.log(`${name} ${(Number(end - start) * 1e-6).toFixed(2)}ms`);
+  const totalNs = Number(end - start);
+  const bytesPerNs = (dataLen * iterations) / totalNs;
+  const mbPerS = bytesPerNs * 1e9 / 1000000
+  console.log(`${name} ${mbPerS.toFixed(2)} MB/s`);
   return res;
 }
 
@@ -40,7 +47,6 @@ function timeIt(name, fn) {
 
   // first: a warmup round
   for (let index = 0; index < inputs.length; index++) {
-    console.log(`hashing data of size: ${inputs[index]}`);
     const data = Buffer.alloc(inputs[index], 1);
     const native = nativeMod.create(key);
     native.append(data);
@@ -53,24 +59,26 @@ function timeIt(name, fn) {
     asBuffer(key, data);
   }
 
+  console.log();
+
   // then record actual timings
   for (let index = 0; index < inputs.length; index++) {
     console.log(`hashing data of size: ${inputs[index]}`);
     const data = Buffer.alloc(inputs[index], 1);
 
-    const nativeRes = timeIt("highwayhasher native", () => {
+    const nativeRes = timeIt("highwayhasher native", data.length, () => {
       const native = nativeMod.create(key);
       native.append(data);
       return native.finalize64();
     });
 
-    const wasmRes = timeIt("highwayhasher wasm", () => {
+    const wasmRes = timeIt("highwayhasher wasm", data.length, () => {
       const wasm = wasmMod.create(key);
       wasm.append(data);
       return wasm.finalize64();
     });
 
-    const thirdRes = timeIt("highwayhash (3rd party)", () => {
+    const thirdRes = timeIt("highwayhash (3rd party)", data.length, () => {
       return asBuffer(key, data);
     });
 

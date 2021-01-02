@@ -21,7 +21,8 @@
     "pretest": "npm run build",
     "test": "npm run test:native && npm run test:types",
     "test:types": "tsc --noEmit test/usage.ts",
-    "test:native": "jest"
+    "test:native": "jest",
+    "prepublishOnly": "./assets/download-releases.sh"
   },
   "os": [
     "darwin",

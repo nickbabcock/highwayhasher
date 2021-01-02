@@ -7,8 +7,7 @@ cd "$(dirname "$0")"
 RELEASE_URL="https://github.com/nickbabcock/highwayhasher/releases/download/latest"
 
 download_version() {
-    curl -o "../dist/node/es/$1" -L "$RELEASE_URL/$1"
-    cp "../dist/node/es/$1" "../dist/node/cjs/$1"
+    curl -o "../dist/node/$1" -L "$RELEASE_URL/$1"
 }
 
 download_version "highwayhasher.linux-x64-gnu.node"

@@ -4,9 +4,11 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-RELEASE_URL="https://github.com/nickbabcock/highwayhasher/releases/download/latest"
+LATEST_TAG=$(git describe --tags --abbrev=0)
+RELEASE_URL="https://github.com/nickbabcock/highwayhasher/releases/download/${LATEST_TAG}"
 
 download_version() {
+    echo "Downloading $RELEASE_URL/$1"
     curl -o "../dist/node/$1" -L "$RELEASE_URL/$1"
 }
 

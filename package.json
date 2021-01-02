@@ -22,7 +22,7 @@
     "test": "npm run test:native && npm run test:types",
     "test:types": "tsc --noEmit test/usage.ts",
     "test:native": "jest",
-    "prepublishOnly": "./assets/download-releases.sh"
+    "prepublishOnly": "./assets/download-releases.sh && npm run test:native"
   },
   "os": [
     "darwin",

@@ -9,7 +9,6 @@ HighwayHasher is JS bindings to the [Rust implementation](https://github.com/nic
 - ✔ All-purpose: Run in both nodejs and the browser
 - ✔ Fast: Generate hashes at over 500 MB/s when running in web assembly
 - ✔ Faster: Generate hashes at over 8 GB/s when running on native hardware
-- ✔ Fastest: highwayhash implementation on npm
 - ✔ Self-contained: Zero runtime dependencies
 - ✔ Accessible: Prebuilt native modules means no build dependencies
 - ✔ Completeness: Generate 64, 128, and 256bit hashes
@@ -59,26 +58,3 @@ let out = hash.finalize64();
 let expected = Uint8Array.from([120, 221, 205, 199, 170, 67, 171, 126]);
 expect(out).toEqual(expected);
 ```
-
-## Benchmarks
-
-To run benchmarks:
-
-```bash
-npm install
-npm run build
-cd bench
-npm install
-node index.js
-```
-
-After running you will see output like:
-
-```
-hashing data of size: 10000000
-hash native 1.38ms
-hash wasm 18.46ms
-3rd party 2.60ms
-```
-
-Here you can see that the native highwayhasher hashes at 7.25 GB/s and the other npm highwayhash implementation hashes at 3.85 GB/s

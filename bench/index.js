@@ -58,19 +58,19 @@ function timeIt(name, fn) {
     console.log(`hashing data of size: ${inputs[index]}`);
     const data = Buffer.alloc(inputs[index], 1);
 
-    const nativeRes = timeIt("hash native", () => {
+    const nativeRes = timeIt("highwayhasher native", () => {
       const native = nativeMod.create(key);
       native.append(data);
       return native.finalize64();
     });
 
-    const wasmRes = timeIt("hash wasm", () => {
+    const wasmRes = timeIt("highwayhasher wasm", () => {
       const wasm = wasmMod.create(key);
       wasm.append(data);
       return wasm.finalize64();
     });
 
-    const thirdRes = timeIt("3rd party", () => {
+    const thirdRes = timeIt("highwayhash (3rd party)", () => {
       return asBuffer(key, data);
     });
 

@@ -1,6 +1,6 @@
 {
   "name": "highwayhasher",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "HighwayHash implementation for both node and browsers",
   "repository": {
     "type": "git",

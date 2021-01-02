@@ -16,12 +16,12 @@ After running you will see output like:
 ```
 hashing data of size: 10000000
 highwayhasher native 1.32ms
-highwayhasher wasm 17.65ms
+highwayhasher wasm 15.49ms
 highwayhash (3rd party) 1.29ms
 
 hashing data of size: 100000000
 highwayhasher native 12.06ms
-highwayhasher wasm 173.21ms
+highwayhasher wasm 135.51ms
 highwayhash (3rd party) 13.14ms
 ```
 

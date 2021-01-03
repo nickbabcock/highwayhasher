@@ -5,7 +5,7 @@ import path from "path";
 import fs from "fs";
 
 const rolls = (fmt, platform) => ({
-  input: platform === "node" ? "src/index_node.ts" : "src/index_browser.ts",
+  input: `src/index_${platform}.ts`,
   output: {
     dir: `dist/${platform}/${fmt}`,
     format: fmt,

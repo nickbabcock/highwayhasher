@@ -5,7 +5,7 @@ const { assert } = require("console");
 const key = Buffer.alloc(32, 1);
 
 function timeIt(name, dataLen, fn) {
-  const iterations = Math.min(Math.max(1000000 / dataLen, 5), 10000);
+  const iterations = Math.min(Math.max(1000000 / dataLen, 10), 10000);
   const start = process.hrtime.bigint();
   let res;
   for (let i = 0; i < iterations; i++) {
@@ -67,12 +67,20 @@ function timeIt(name, dataLen, fn) {
     const data = Buffer.alloc(inputs[index], 1);
 
     const nativeRes = timeIt("highwayhasher native", data.length, () => {
+      return nativeMod.hash64(key, data);
+    });
+
+    timeIt("highwayhasher native streaming", data.length, () => {
       const native = nativeMod.create(key);
       native.append(data);
       return native.finalize64();
     });
 
     const wasmRes = timeIt("highwayhasher wasm", data.length, () => {
+      return wasmMod.hash64(key, data);
+    });
+
+    timeIt("highwayhasher wasm streaming", data.length, () => {
       const wasm = wasmMod.create(key);
       wasm.append(data);
       return wasm.finalize64();

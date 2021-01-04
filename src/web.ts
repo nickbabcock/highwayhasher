@@ -14,6 +14,30 @@ class WasmHash extends WasmHighway implements IHash {
 export const WasmModule: HashCreator = class WasmModule {
   static create = (key: Uint8Array | null | undefined): IHash =>
     new WasmHash(key);
+  static hash64 = (
+    key: Uint8Array | null | undefined,
+    data: Uint8Array
+  ): Uint8Array => {
+    const hasher = WasmModule.create(key);
+    hasher.append(data);
+    return hasher.finalize64();
+  };
+  static hash128 = (
+    key: Uint8Array | null | undefined,
+    data: Uint8Array
+  ): Uint8Array => {
+    const hasher = WasmModule.create(key);
+    hasher.append(data);
+    return hasher.finalize128();
+  };
+  static hash256 = (
+    key: Uint8Array | null | undefined,
+    data: Uint8Array
+  ): Uint8Array => {
+    const hasher = WasmModule.create(key);
+    hasher.append(data);
+    return hasher.finalize256();
+  };
 };
 
 /**

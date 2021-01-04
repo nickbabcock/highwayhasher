@@ -45,6 +45,18 @@ expect(out).toEqual(expected);
 
 That's it! Now your program will use native code on nodejs and Wasm in the browser (when bundled by webpack, rollup, or any other javascript bundler that respects [the `browser` package.json spec](https://github.com/defunctzombie/package-browser-field-spec)) without any bloat!
 
+## Non-Streaming API
+
+When executing on native hardware and the data to hash is known entirely, one can use one of the non-streaming APIs that operate more efficiently than their incremental counterparts on small data.
+
+```js
+import { HighwayHash } from "highwayhasher";
+
+const keyData = Uint8Array.from(new Array(32).fill(1));
+const hasher = await HighwayHash.loadModule();
+const out = hasher.hash64(keyData, Uint8Array.from([0]));
+```
+
 ## Wasm-Only
 
 Since Wasm is cross platform, one can drop any reliance on native dependencies by opting to only use the Wasm implementation

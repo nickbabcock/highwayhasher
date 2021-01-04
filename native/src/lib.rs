@@ -1,5 +1,5 @@
-use highway::{HighwayBuilder, HighwayHash, Key};
 use common::{data_to_lanes, u64_slice_to_u8};
+use highway::{HighwayBuilder, HighwayHash, Key};
 use napi::{CallContext, JsBuffer, JsFunction, JsObject, JsUndefined, Property};
 use napi_derive::{js_function, module_exports};
 
@@ -52,9 +52,7 @@ fn finalize64(ctx: CallContext) -> napi::Result<JsBuffer> {
     let this: JsObject = ctx.this()?;
     let hasher: &mut HighwayBuilder = ctx.env.unwrap(&this)?;
     let res = hasher.clone().finalize64();
-    let buf = ctx
-        .env
-        .create_buffer_with_data(res.to_ne_bytes().to_vec())?;
+    let buf = ctx.env.create_buffer_copy(&res.to_le_bytes()[..])?;
     Ok(buf.into_raw())
 }
 
@@ -63,8 +61,9 @@ fn finalize128(ctx: CallContext) -> napi::Result<JsBuffer> {
     let this: JsObject = ctx.this()?;
     let hasher: &mut HighwayBuilder = ctx.env.unwrap(&this)?;
     let hash = hasher.clone().finalize128();
-    let bytes = u64_slice_to_u8(&hash);
-    let buf = ctx.env.create_buffer_with_data(bytes.to_vec())?;
+    let mut bytes = [0u8; 16];
+    u64_slice_to_u8(&mut bytes, &hash[..]);
+    let buf = ctx.env.create_buffer_copy(&bytes[..])?;
     Ok(buf.into_raw())
 }
 
@@ -73,8 +72,9 @@ fn finalize256(ctx: CallContext) -> napi::Result<JsBuffer> {
     let this: JsObject = ctx.this()?;
     let hasher: &mut HighwayBuilder = ctx.env.unwrap(&this)?;
     let hash = hasher.clone().finalize256();
-    let bytes = u64_slice_to_u8(&hash);
-    let buf = ctx.env.create_buffer_with_data(bytes.to_vec())?;
+    let mut bytes = [0u8; 32];
+    u64_slice_to_u8(&mut bytes, &hash[..]);
+    let buf = ctx.env.create_buffer_copy(&bytes[..])?;
     Ok(buf.into_raw())
 }
 

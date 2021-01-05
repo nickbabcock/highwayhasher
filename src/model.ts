@@ -31,4 +31,19 @@ export interface HashCreator {
    * Create a highwayhasher based on the given 32 byte long buffer
    */
   create(key: Uint8Array | null | undefined): IHash;
+
+  /**
+   * return 64bit hash of data with a given key
+   */
+  hash64(key: Uint8Array | null | undefined, data: Uint8Array): Uint8Array;
+
+  /**
+   * return 128bit hash of data with a given key
+   */
+  hash128(key: Uint8Array | null | undefined, data: Uint8Array): Uint8Array;
+
+  /**
+   * return 256bit hash of data with a given key
+   */
+  hash256(key: Uint8Array | null | undefined, data: Uint8Array): Uint8Array;
 }

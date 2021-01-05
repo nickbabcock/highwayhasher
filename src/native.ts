@@ -1,5 +1,6 @@
 import type { HashCreator, IHash } from "./model";
 import { platform, arch } from "os";
+import { validKey } from "./common";
 
 const getAbi = (platform: string): string => {
   switch (platform) {
@@ -8,23 +9,25 @@ const getAbi = (platform: string): string => {
     case "win32":
       return "-msvc";
     default:
-      return ""
+      return "";
   }
-}
+};
 
 const MODULE_NAME = "highwayhasher";
 const PLATFORM = platform();
 const ABI = getAbi(PLATFORM);
-const { createHighwayClass } = require(`../${MODULE_NAME}.${PLATFORM}-${arch()}${ABI}.node`);
+const {
+  createHighwayClass,
+  hash64: internalHash64,
+  hash128: internalHash128,
+  hash256: internalHash256,
+} = require(`../${MODULE_NAME}.${PLATFORM}-${arch()}${ABI}.node`);
 const InternalHasher = createHighwayClass();
 
 class NativeHash implements IHash {
   private inner: typeof InternalHasher;
   constructor(key: Uint8Array | null | undefined) {
-    if (key && key.length != 32) {
-      throw new Error("expected the key buffer to be 32 bytes long");
-    }
-    this.inner = new InternalHasher(key || new Uint8Array());
+    this.inner = new InternalHasher(validKey(key));
   }
 
   static load = async (key: Uint8Array | null | undefined) =>
@@ -40,6 +43,18 @@ class NativeHash implements IHash {
 export const NativeModule: HashCreator = class NativeModule {
   static create = (key: Uint8Array | null | undefined): IHash =>
     new NativeHash(key);
+  static hash64 = (
+    key: Uint8Array | null | undefined,
+    data: Uint8Array
+  ): Uint8Array => new Uint8Array(internalHash64(validKey(key), data).buffer);
+  static hash128 = (
+    key: Uint8Array | null | undefined,
+    data: Uint8Array
+  ): Uint8Array => new Uint8Array(internalHash128(validKey(key), data).buffer);
+  static hash256 = (
+    key: Uint8Array | null | undefined,
+    data: Uint8Array
+  ): Uint8Array => new Uint8Array(internalHash256(validKey(key), data).buffer);
 };
 
 export class NativeHighwayHash {

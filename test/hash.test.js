@@ -59,7 +59,7 @@ const parameters = [
 ];
 
 for (const [name, Hash] of parameters) {
-  describe(`${name} hash`, () => {
+  describe(`${name} incremental hash`, () => {
     it("load and create hash", async () => {
       const mod = await Hash.loadModule();
       const hash = mod.create();
@@ -218,6 +218,37 @@ for (const [name, Hash] of parameters) {
         32,
       ]);
       expect(out).toEqual(expected);
+    });
+  });
+}
+
+for (const [name, Hash] of parameters) {
+  describe(`${name} hash`, () => {
+    it("64bit equivalency", async () => {
+      const hash1 = await Hash.loadModule();
+      const out1 = hash1.hash64(keyData, Uint8Array.from([0]));
+      const hash2 = hash1.create(keyData);
+      hash2.append(Uint8Array.from([0]));
+      const out2 = hash2.finalize64();
+      expect(out1).toEqual(out2);
+    });
+
+    it("128bit equivalency", async () => {
+      const hash1 = await Hash.loadModule();
+      const out1 = hash1.hash128(keyData, Uint8Array.from([0]));
+      const hash2 = hash1.create(keyData);
+      hash2.append(Uint8Array.from([0]));
+      const out2 = hash2.finalize128();
+      expect(out1).toEqual(out2);
+    });
+
+    it("256bit equivalency", async () => {
+      const hash1 = await Hash.loadModule();
+      const out1 = hash1.hash256(keyData, Uint8Array.from([0]));
+      const hash2 = hash1.create(keyData);
+      hash2.append(Uint8Array.from([0]));
+      const out2 = hash2.finalize256();
+      expect(out1).toEqual(out2);
     });
   });
 }

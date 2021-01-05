@@ -12,47 +12,68 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         build:
         - win-msvc
         - macos
         - linux-gnu
+        - linux-aarch64
+        - linux-armv7
         include:
         - build: win-msvc
           os: windows-latest
-          target: x86_64-pc-windows-msvc
         - build: macos
           os: macos-latest
-          target: x86_64-apple-darwin
         - build: linux-gnu
           os: ubuntu-20.04
-          target: x86_64-unknown-linux-gnu        
+        - build: linux-aarch64
+          os: ubuntu-latest
+          target: aarch64-unknown-linux-gnu
+        - build: linux-armv7
+          os: ubuntu-latest
+          target: armv7-unknown-linux-gnueabihf
 
     steps:
     - uses: actions/checkout@v1
+    - name: Use Cross
+      if: matrix.target != ''
+      run: |
+        cargo install cross
+        echo "CARGO=cross" >> $GITHUB_ENV
+        echo "TARGET=${{ matrix.target }}" >> $GITHUB_ENV
     - name: Use Node
       uses: actions/setup-node@v1
       with:
         node-version: '12.x'
     - name: Install wasm-pack
       run:  curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh 
-    - name: npm install, build, and test
+    - name: npm install & build
+      shell: bash
       run: |
         npm install
-        npm run build --if-present
-        npm test
-      env:
-        CI: true
+        npm run build:web
+        npm run build:native -- ${TARGET:+--target "$TARGET"}
+        npm run build
+    - name: npm test
+      if: matrix.target == ''
+      shell: bash
+      run: npm test
     - name: browser test
       working-directory: ./e2e
+      if: matrix.target == ''
       run: |
         npm install
         npm test
-      env:
-        CI: true
     - name: strip linux builds
       if: matrix.build == 'linux-gnu'
       run: strip dist/node/*.node
+    - name: strip linux-aarch64 builds
+      if: matrix.build == 'linux-aarch64'
+      run: sudo apt-get install binutils-aarch64-linux-gnu && aarch64-linux-gnu-strip dist/node/*.node
+    - name: strip linux-armv7 builds
+      if: matrix.build == 'linux-armv7'
+      run: sudo apt-get install binutils-arm-linux-gnueabihf && arm-linux-gnueabihf-strip dist/node/*.node
     - name: Set artifact name
       shell: bash
       working-directory: dist/node

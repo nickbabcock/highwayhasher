@@ -1,27 +1,32 @@
 import type { HashCreator, IHash } from "./model";
-import { platform, arch } from "os";
+import os from "os";
 import { validKey } from "./common";
 
-const getAbi = (platform: string): string => {
-  switch (platform) {
-    case "linux":
-      return "-gnu";
-    case "win32":
-      return "-msvc";
-    default:
-      return "";
+const getTriple = (): string => {
+  const platform = os.platform();
+  const arch = os.arch();
+  if (platform === "linux" && arch === "x64") {
+    return "x86_64-unknown-linux-gnu";
+  } else if (platform === "linux" && arch === "arm64") {
+    return "aarch64-unknown-linux-gnu";
+  } else if (platform === "linux" && arch === "arm") {
+    return "armv7-unknown-linux-gnueabihf";
+  } else if (platform === "darwin" && arch === "x64") {
+    return "x86_64-apple-darwin";
+  } else if (platform === "win32" && arch == "x64") {
+    return "x86_64-pc-windows-msvc";
+  } else {
+    throw new Error(`unknown platform-arch: ${platform}-${arch}`)
   }
 };
 
 const MODULE_NAME = "highwayhasher";
-const PLATFORM = platform();
-const ABI = getAbi(PLATFORM);
 const {
   createHighwayClass,
   hash64: internalHash64,
   hash128: internalHash128,
   hash256: internalHash256,
-} = require(`../${MODULE_NAME}.${PLATFORM}-${arch()}${ABI}.node`);
+} = require(`../${MODULE_NAME}-${getTriple()}.node`);
 const InternalHasher = createHighwayClass();
 
 class NativeHash implements IHash {

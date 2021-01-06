@@ -1,4 +1,8 @@
-## v0.0.45 - 2021-01-05
+## v0.0.6 - 2021-01-05
+
+- Fix release
+
+## v0.0.5 - 2021-01-05
 
 - Introduce non-streaming APIs to reduce performance impact of N-API calls
 - Provide armv7-unknown-linux-gnueabihf builds

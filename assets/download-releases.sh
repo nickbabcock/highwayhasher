@@ -12,8 +12,8 @@ download_version() {
     curl -o "../dist/node/$1" -L "$RELEASE_URL/$1"
 }
 
-download_version "highwayhasher.x86_64-unknown-linux-gnu.node"
-download_version "highwayhasher.aarch64-unknown-linux-gnu.node"
-download_version "highwayhasher.armv7-unknown-linux-gnueabihf.node"
-download_version "highwayhasher.x86_64-apple-darwin.node"
-download_version "highwayhasher.x86_64-pc-windows-msvc.node"
+download_version "highwayhasher-x86_64-unknown-linux-gnu.node"
+download_version "highwayhasher-aarch64-unknown-linux-gnu.node"
+download_version "highwayhasher-armv7-unknown-linux-gnueabihf.node"
+download_version "highwayhasher-x86_64-apple-darwin.node"
+download_version "highwayhasher-x86_64-pc-windows-msvc.node"

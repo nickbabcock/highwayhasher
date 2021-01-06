@@ -13,27 +13,17 @@
     "./dist/node/es/index_node.js": "./dist/browser/es/index_browser.js"
   },
   "types": "./dist/browser/es/index_browser.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "npm run build:native && npm run build:web && rm -rf dist/ && rollup -c && cp ./native/*.node ./dist/node/.",
-    "build:native": "cd native && napi build -c ../package.json --platform --release",
+    "build": "rm -rf dist/ && rollup -c",
+    "build:native": "bash ./assets/build-native.sh",
     "build:web": "wasm-pack build -t web --out-dir ../src/web web",
-    "pretest": "npm run build",
     "test": "npm run test:native && npm run test:types",
     "test:types": "tsc --noEmit test/usage.ts",
     "test:native": "jest",
-    "prepublishOnly": "./assets/download-releases.sh && npm run test:native"
-  },
-  "os": [
-    "darwin",
-    "linux",
-    "win32"
-  ],
-  "napi": {
-    "name": "highwayhasher",
-    "triples": {
-      "defaults": true
-    }
+    "prepublishOnly": "./assets/download-releases.sh && npm test"
   },
   "jest": {
     "testRegex": "./test/.*.js$",
@@ -49,7 +39,6 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "@napi-rs/cli": "^1.0.0",
     "@rollup/plugin-typescript": "^8.1.0",
     "@rollup/plugin-wasm": "^5.1.2",
     "jest": "^26.6.0",

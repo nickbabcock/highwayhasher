@@ -1,3 +1,7 @@
+## v0.1.0 - 2021-02-07
+
+- Minor dependency updates.
+
 ## v0.0.6 - 2021-01-05
 
 - Fix release

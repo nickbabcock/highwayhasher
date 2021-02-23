@@ -54,11 +54,11 @@ jobs:
         npm install
         npm run build:web
         npm run build:native -- ${TARGET:+--target "$TARGET"}
-        npm run build
+        npm run build:bundle
     - name: npm test
       if: matrix.target == ''
       shell: bash
-      run: npm test
+      run: npm run test:inplace
     - name: browser test
       working-directory: ./e2e
       if: matrix.target == ''

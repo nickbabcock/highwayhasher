@@ -58,7 +58,9 @@ const parameters = [
   ["wasm", WasmHighwayHash],
 ];
 
-for (const [name, Hash] of parameters) {
+for (let i = 0; i < parameters.length; i++) {
+  const name = parameters[i][0];
+  const Hash = parameters[i][1];
   describe(`${name} incremental hash`, () => {
     it("load and create hash", async () => {
       const mod = await Hash.loadModule();
@@ -222,7 +224,9 @@ for (const [name, Hash] of parameters) {
   });
 }
 
-for (const [name, Hash] of parameters) {
+for (let i = 0; i < parameters.length; i++) {
+  const name = parameters[i][0];
+  const Hash = parameters[i][1];
   describe(`${name} hash`, () => {
     it("64bit equivalency", async () => {
       const hash1 = await Hash.loadModule();

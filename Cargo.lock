@@ -52,9 +52,9 @@ dependencies = [
 
 [[package]]
 name = "highway"
-version = "0.6.3"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66920f2e905206a4aca271ae71f1638f10854e3739f162fc465fb8aecce44446"
+checksum = "3461b968f695ca312b968503261f5a345de0f02a39dbaa3021f20d53b426395d"
 
 [[package]]
 name = "highwayhasher"

@@ -13,6 +13,8 @@ const getTriple = (): string => {
     return "armv7-unknown-linux-gnueabihf";
   } else if (platform === "darwin" && arch === "x64") {
     return "x86_64-apple-darwin";
+  } else if (platform === "darwin" && arch === "arm") {
+    return "aarch64-apple-darwin";
   } else if (platform === "win32" && arch == "x64") {
     return "x86_64-pc-windows-msvc";
   } else {

@@ -1,3 +1,7 @@
+## v0.1.2 - 2021-11-09
+
+- Delay native module loading until called
+
 ## v0.1.1 - 2021-11-08
 
 - Provide apple silicon native build (though it won't be as hardware accelerated as x86 variants)

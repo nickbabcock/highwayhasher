@@ -1,3 +1,7 @@
+## v0.1.1 - 2021-11-08
+
+- Provide apple silicon native build (though it won't be as hardware accelerated as x86 variants)
+
 ## v0.1.0 - 2021-02-07
 
 - Minor dependency updates.

@@ -14,7 +14,7 @@ function timeIt(name, dataLen, fn) {
   const end = process.hrtime.bigint();
   const totalNs = Number(end - start);
   const bytesPerNs = (dataLen * iterations) / totalNs;
-  const mbPerS = bytesPerNs * 1e9 / 1000000
+  const mbPerS = (bytesPerNs * 1e9) / 1000000;
   console.log(`${name} ${mbPerS.toFixed(2)} MB/s`);
   return res;
 }
@@ -34,15 +34,7 @@ function timeIt(name, dataLen, fn) {
   );
 
   const inputs = [
-    1,
-    10,
-    100,
-    1000,
-    10000,
-    100000,
-    1000000,
-    10000000,
-    100000000,
+    1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000,
   ];
 
   // first: a warmup round

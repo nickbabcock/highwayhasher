@@ -18,7 +18,7 @@ const getTriple = (): string => {
   } else if (platform === "win32" && arch == "x64") {
     return "x86_64-pc-windows-msvc";
   } else {
-    throw new Error(`unknown platform-arch: ${platform}-${arch}`)
+    throw new Error(`unknown platform-arch: ${platform}-${arch}`);
   }
 };
 

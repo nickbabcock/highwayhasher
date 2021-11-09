@@ -1,6 +1,8 @@
 # HighwayHasher
 
 ![CI](https://github.com/nickbabcock/highwayhasher/workflows/CI/badge.svg)
+[![npm](https://img.shields.io/npm/v/highwayhasher.svg)](http://npm.im/highwayhasher)
+[![size](https://badgen.net/bundlephobia/minzip/highwayhasher)](https://bundlephobia.com/package/highwayhasher)
 
 HighwayHasher is JS bindings to the [Rust implementation](https://github.com/nickbabcock/highway-rs) of [Google's HighwayHash](https://github.com/google/highwayhash), a fast, keyed and strong hash function.
 

@@ -22,16 +22,16 @@ const rolls = (fmt, platform) => ({
       generateBundle() {
         // Remove the `import` bundler directive that wasm-bindgen spits out as webpack < 5
         // doesn't understand that directive
-        const data = fs.readFileSync(
-          path.resolve(`src/web/highwayhasher_web.js`),
-          "utf8"
-        );
+        const removeImport = (fp) => {
+          const data = fs.readFileSync(path.resolve(fp), "utf8");
+          fs.writeFileSync(
+            path.resolve(fp),
+            data.replace("import.meta.url", "input")
+          );
+        };
 
-        fs.writeFileSync(
-          path.resolve(`src/web/highwayhasher_web.js`),
-          data.replace("import.meta.url", "input")
-        );
-
+        removeImport("src/web/highwayhasher_web.js");
+        removeImport("src/web-simd/highwayhasher_web.js");
         if (fmt === "cjs" && platform === "node") {
           distributeSharedNode();
         }

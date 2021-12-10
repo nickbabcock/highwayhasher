@@ -17,15 +17,17 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist/ && npm run build:web && npm run build:native && npm run build:bundle",
+    "build": "rm -rf dist/ && npm run build:web && npm run build:web-simd && npm run build:native && npm run build:bundle",
     "build:native": "bash ./assets/build-native.sh",
     "build:web": "wasm-pack build -t web --out-dir ../src/web web",
+    "build:web-simd": "RUSTFLAGS='-C target-feature=+simd128' wasm-pack build -t web --out-dir ../src/web-simd web",
     "build:bundle": "rollup -c",
+    "optimize": "wasm-opt -Os src/web/highwayhasher_web_bg.wasm -o tmp.wasm && mv tmp.wasm src/web/highwayhasher_web_bg.wasm && wasm-opt -Os src/web-simd/highwayhasher_web_bg.wasm -o tmp.wasm && mv tmp.wasm src/web-simd/highwayhasher_web_bg.wasm",
     "test": "npm run build && npm run test:inplace",
     "test:inplace": "npm run test:native && npm run test:types",
     "test:types": "tsc --noEmit test/usage.ts",
     "test:native": "jest",
-    "prepublishOnly": "./assets/download-releases.sh && npm test"
+    "prepublishOnly": "./assets/download-releases.sh && npm test && npm run optimize && npm run build:bundle"
   },
   "jest": {
     "testRegex": "./test/.*.js$",

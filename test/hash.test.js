@@ -1,4 +1,4 @@
-const { HighwayHash, WasmHighwayHash } = require("..");
+const { HighwayHash, WasmHighwayHash, hasWasmSimd } = require("..");
 
 // ref: https://github.com/iliakan/detect-node
 function isNode() {
@@ -137,4 +137,23 @@ for (let i = 0; i < parameters.length; i++) {
       expect(out1).toEqual(out2);
     });
   });
+}
+
+if (!hasWasmSimd() && isNode()) {
+  // Seemingly can only catch this on node.js
+  it("should throw on Wasm SIMD forced", async () => {
+    try {
+      await WasmHighwayHash.loadModule({ simd: true });
+      fail("Should have thrown exception");
+    } catch (e) {
+    }
+  })
+} else if (hasWasmSimd()) {
+  it("should hash with Wasm SIMD forced", async () => {
+    const mod = await WasmHighwayHash.loadModule({ simd: true });
+    const hash = mod.create();
+    let out = hash.finalize64();
+    let expected = Uint8Array.from([105, 68, 213, 185, 117, 218, 53, 112]);
+    expect(out).toEqual(expected);
+  })
 }

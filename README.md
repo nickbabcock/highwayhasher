@@ -9,7 +9,7 @@ HighwayHasher is JS bindings to the [Rust implementation](https://github.com/nic
 ## Features
 
 - ✔ Isomorphic: Run on node and in the browser with the same API
-- ✔ Fast: Generate hashes at over 700 MB/s when running in web assembly
+- ✔ Fast: Generate hashes at over 2 GB/s when running on SIMD enabled web assembly
 - ✔ Faster: Generate hashes at over 8 GB/s when running on native hardware
 - ✔ Self-contained: Zero runtime dependencies
 - ✔ Accessible: Prebuilt native modules means no build dependencies

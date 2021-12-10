@@ -1,3 +1,3 @@
-export type { IHash, HashCreator } from "./model";
-export { WasmHighwayHash } from "./web";
+export type { IHash, HashCreator, HighwayLoadOptions } from "./model";
+export { WasmHighwayHash, hasSimd as hasWasmSimd } from "./web";
 export { WasmHighwayHash as HighwayHash } from "./web";

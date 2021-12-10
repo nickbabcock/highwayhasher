@@ -1,4 +1,4 @@
-import type { HashCreator, IHash } from "./model";
+import type { HashCreator, HighwayLoadOptions, IHash } from "./model";
 import os from "os";
 import { validKey } from "./common";
 
@@ -60,7 +60,9 @@ export const NativeModule: HashCreator = class NativeModule {
 };
 
 export class NativeHighwayHash {
-  static async loadModule(): Promise<HashCreator> {
+  static async loadModule(
+    _options?: Partial<HighwayLoadOptions>
+  ): Promise<HashCreator> {
     if (native === undefined) {
       native = require(`../${MODULE_NAME}-${getTriple()}.node`);
       InternalHasher = native.createHighwayClass();
@@ -69,7 +71,10 @@ export class NativeHighwayHash {
     return NativeModule;
   }
 
-  static async load(key: Uint8Array | null | undefined): Promise<IHash> {
+  static async load(
+    key: Uint8Array | null | undefined,
+    _options?: Partial<HighwayLoadOptions>
+  ): Promise<IHash> {
     return new NativeHash(key);
   }
 }

@@ -47,3 +47,16 @@ export interface HashCreator {
    */
   hash256(key: Uint8Array | null | undefined, data: Uint8Array): Uint8Array;
 }
+
+/**
+ * Customize how highway modules are loaded
+ */
+export interface HighwayLoadOptions {
+  /**
+   * Execute HighwayHash with SIMD instructions. This option is only
+   * applicable in a Wasm environment, as native hardware will detect SIMD at
+   * runtime. `highwayhasher` will detect if Wasm SIMD is enabled if this
+   * option is not set, so this option is used to override the heuristic.
+   */
+  simd?: boolean;
+}

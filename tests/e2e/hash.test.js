@@ -1,0 +1,1 @@
+../unit/hash.test.js

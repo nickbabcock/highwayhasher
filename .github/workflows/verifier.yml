@@ -18,7 +18,7 @@ jobs:
       with:
         node-version: ${{ matrix.node }}
     - name: verifier test
-      working-directory: ./verifier
+      working-directory: ./tests/verifier
       run: |
         npm install
         npm test

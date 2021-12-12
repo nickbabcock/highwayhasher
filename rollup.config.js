@@ -7,7 +7,7 @@ import os from "os";
 import fs from "fs";
 
 const rolls = (fmt, platform) => ({
-  input: `src/index_${platform}.ts`,
+  input: `src/main/index_${platform}.ts`,
   output: {
     dir: `dist/${platform}/${fmt}`,
     format: fmt,
@@ -30,8 +30,8 @@ const rolls = (fmt, platform) => ({
           );
         };
 
-        removeImport("src/web/highwayhasher_web.js");
-        removeImport("src/web-simd/highwayhasher_web.js");
+        removeImport("src/main/web/highwayhasher_web.js");
+        removeImport("src/main/web-simd/highwayhasher_web.js");
         if (fmt === "cjs" && platform === "node") {
           distributeSharedNode();
         }

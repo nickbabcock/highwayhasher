@@ -1,8 +1,8 @@
 [workspace]
 members = [
-    "common",
-    "web",
-    "native",
+    "src/common",
+    "src/web",
+    "src/native",
 ]
 
 [profile.release]

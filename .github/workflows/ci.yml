@@ -63,7 +63,7 @@ jobs:
       run: |
         npm install
         npm run build:web
-        RUSTFLAGS='-C target-feature=+simd128' wasm-pack build -t web --out-dir ../src/web-simd web
+        RUSTFLAGS='-C target-feature=+simd128' wasm-pack build -t web --out-dir ../main/web-simd src/web
         npm run build:native -- ${TARGET:+--target "$TARGET"}
         npm run build:bundle
     - name: npm test
@@ -71,7 +71,7 @@ jobs:
       shell: bash
       run: npm run test:inplace
     - name: browser test
-      working-directory: ./e2e
+      working-directory: ./tests/e2e
       if: matrix.target == ''
       run: |
         npm install

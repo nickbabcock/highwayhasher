@@ -21,8 +21,12 @@ function timeIt(name, dataLen, fn) {
 
 (async function () {
   console.time("initialize wasm");
-  const wasmMod = await WasmHighwayHash.loadModule();
+  const wasmMod = await WasmHighwayHash.loadModule({ simd: false });
   console.timeLog("initialize wasm");
+
+  console.time("initialize wasm simd");
+  const wasmSimdMod = await WasmHighwayHash.loadModule({ simd: true });
+  console.timeLog("initialize wasm simd");
 
   console.time("initialize native");
   const nativeMod = await HighwayHash.loadModule();
@@ -40,13 +44,11 @@ function timeIt(name, dataLen, fn) {
   // first: a warmup round
   for (let index = 0; index < inputs.length; index++) {
     const data = Buffer.alloc(inputs[index], 1);
-    const native = nativeMod.create(key);
-    native.append(data);
-    native.finalize64();
-
-    const wasm = wasmMod.create(key);
-    wasm.append(data);
-    wasm.finalize64();
+    for (let mod of [nativeMod, wasmMod, wasmSimdMod]) {
+      const hasher = mod.create(key);
+      hasher.append(data);
+      hasher.finalize64();
+    }
 
     asBuffer(key, data);
   }
@@ -68,11 +70,15 @@ function timeIt(name, dataLen, fn) {
       return native.finalize64();
     });
 
-    const wasmRes = timeIt("highwayhasher wasm", data.length, () => {
+    const wasmSimd = timeIt("highwayhasher wasm simd", data.length, () => {
+      return wasmSimdMod.hash64(key, data);
+    });
+
+    const wasmRes = timeIt("highwayhasher wasm scalar", data.length, () => {
       return wasmMod.hash64(key, data);
     });
 
-    timeIt("highwayhasher wasm streaming", data.length, () => {
+    timeIt("highwayhasher wasm scalar streaming", data.length, () => {
       const wasm = wasmMod.create(key);
       wasm.append(data);
       return wasm.finalize64();
@@ -83,6 +89,7 @@ function timeIt(name, dataLen, fn) {
     });
 
     assert(Buffer.from(nativeRes.buffer).equals(wasmRes), "hash modules agree");
+    assert(Buffer.from(wasmSimd.buffer).equals(wasmRes), "hash modules agree");
     assert(
       Buffer.from(nativeRes.buffer).equals(thirdRes),
       "hash packages agree"

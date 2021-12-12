@@ -7,7 +7,7 @@ const keyData = Uint8Array.from([
 ]);
 
 (async function () {
-  const hasher: IHash = await HighwayHash.load(keyData);
+  const hasher: IHash = await HighwayHash.load(keyData, { simd: true });
   hasher.append(Uint8Array.from([0]));
   const out: Uint8Array = hasher.finalize64();
   console.log(out);
@@ -22,4 +22,6 @@ const keyData = Uint8Array.from([
   hasher3.append(Uint8Array.from([0]));
   const out3: Uint8Array = hasher3.finalize64();
   console.log(out3);
+
+  await WasmHighwayHash.loadModule({ simd: true });
 })();

@@ -1,3 +1,7 @@
+## v0.2.1 - 2021-12-14
+
+Fix absence of node native modules in distribution
+
 ## v0.2.0 - 2021-12-14
 
 Add Wasm SIMD implementation that will automatically be enabled when supported by the underlying Wasm runtime. If desired, it can be disabled with:

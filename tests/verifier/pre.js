@@ -10,5 +10,5 @@ if (!fs.existsSync("test")) {
 
 fs.writeFileSync(
   path.resolve(`test/hash.test.js`),
-  data.replace("..", "highwayhasher")
+  data.replace("../..", "highwayhasher")
 );

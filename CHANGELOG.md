@@ -1,3 +1,11 @@
+## v0.2.0 - 2021-12-14
+
+Add Wasm SIMD implementation that will automatically be enabled when supported by the underlying Wasm runtime. If desired, it can be disabled with:
+
+```ts
+const hasher: IHash = await HighwayHash.load(keyData, { simd: true });
+```
+
 ## v0.1.2 - 2021-11-09
 
 - Delay native module loading until called

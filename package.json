@@ -28,7 +28,7 @@
     "test:inplace": "npm run test:native && npm run test:types",
     "test:types": "tsc --noEmit tests/unit/usage.ts",
     "test:native": "jest",
-    "prepublishOnly": "./assets/download-releases.sh && npm test && npm run optimize && npm run build:bundle"
+    "prepublishOnly": "npm test && npm run optimize && ./assets/download-releases.sh && npm run build:bundle"
   },
   "jest": {
     "testRegex": "./tests/unit/.*.js$",

@@ -30,8 +30,8 @@ const rolls = (fmt, platform) => ({
           );
         };
 
-        removeImport("src/main/web/highwayhasher_web.js");
-        removeImport("src/main/web-simd/highwayhasher_web.js");
+        removeImport("src/main/wasm/highwayhasher_wasm.js");
+        removeImport("src/main/wasm-simd/highwayhasher_wasm.js");
         if (fmt === "cjs" && platform === "node") {
           distributeSharedNode();
         }

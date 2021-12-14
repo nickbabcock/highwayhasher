@@ -1,11 +1,11 @@
 import type { HashCreator, HighwayLoadOptions, IHash } from "./model";
 import { validKey } from "./common";
-import init, { WasmHighway } from "./web/highwayhasher_web";
+import init, { WasmHighway } from "./wasm/highwayhasher_wasm";
 import simdInit, {
   WasmHighway as WasmSimdHighway,
-} from "./web-simd/highwayhasher_web";
-import wasm from "./web/highwayhasher_web_bg.wasm";
-import wasmSimd from "./web-simd/highwayhasher_web_bg.wasm";
+} from "./wasm-simd/highwayhasher_wasm";
+import wasm from "./wasm/highwayhasher_wasm_bg.wasm";
+import wasmSimd from "./wasm-simd/highwayhasher_wasm_bg.wasm";
 
 class WasmHash extends WasmHighway implements IHash {
   constructor(key: Uint8Array | null | undefined) {

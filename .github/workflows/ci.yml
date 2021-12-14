@@ -57,13 +57,17 @@ jobs:
       with:
         node-version: ${{ matrix.node }}
     - name: Install wasm-pack
-      run:  curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh 
-    - name: npm install & build
+      run:  curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+    - run: npm install
+    - name: build wasm-simd
+      shell: bash
+      run: npm run build:wasm-simd-ci
+      env:
+        RUSTFLAGS: '-C target-feature=+simd128'
+    - name: build
       shell: bash
       run: |
-        npm install
-        npm run build:web
-        RUSTFLAGS='-C target-feature=+simd128' wasm-pack build -t web --out-dir ../main/web-simd src/web
+        npm run build:wasm
         npm run build:native -- ${TARGET:+--target "$TARGET"}
         npm run build:bundle
     - name: npm test

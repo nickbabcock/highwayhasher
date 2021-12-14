@@ -42,7 +42,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "highwayhasher-web"
+name = "highwayhasher-wasm"
 version = "0.1.0"
 dependencies = [
  "common",

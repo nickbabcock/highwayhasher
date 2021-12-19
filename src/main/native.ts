@@ -65,7 +65,7 @@ export class NativeHighwayHash {
   ): Promise<HashCreator> {
     if (native === undefined) {
       native = require(`../${MODULE_NAME}-${getTriple()}.node`);
-      InternalHasher = native.createHighwayClass();
+      InternalHasher = native.HighwayHasher;
     }
 
     return NativeModule;

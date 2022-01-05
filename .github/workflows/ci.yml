@@ -57,7 +57,7 @@ jobs:
       with:
         node-version: ${{ matrix.node }}
     - name: Install wasm-pack
-      run:  curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      run:  npm install -g wasm-pack@0.10.1
     - run: npm install
     - name: build wasm-simd
       shell: bash

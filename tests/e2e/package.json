@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "karmatic hash.test.js"
+    "test": "karmatic --coverage false hash.test.js"
   },
   "keywords": [],
   "author": "Nick Babcock",

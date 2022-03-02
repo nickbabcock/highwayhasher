@@ -80,6 +80,11 @@ export class WasmHighwayHash {
     const module = await WasmHighwayHash.loadModule(options);
     return module.create(key);
   }
+
+  static resetModule() {
+    wasmInitialized = false;
+    wasmSimdInitialized = false;
+  }
 }
 
 let wasmInitialized = false;

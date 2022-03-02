@@ -28,7 +28,7 @@ let InternalHasher = undefined;
 
 class NativeHash implements IHash {
   private inner: any;
-  constructor(key: Uint8Array | null | undefined) {
+  constructor(key?: Uint8Array | null | undefined) {
     this.inner = new InternalHasher(validKey(key));
   }
 
@@ -72,7 +72,7 @@ export class NativeHighwayHash {
   }
 
   static async load(
-    key: Uint8Array | null | undefined,
+    key?: Uint8Array | null | undefined,
     options?: Partial<HighwayLoadOptions>
   ): Promise<IHash> {
     const mod = await NativeHighwayHash.loadModule(options);

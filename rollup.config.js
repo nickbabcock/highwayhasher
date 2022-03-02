@@ -33,7 +33,20 @@ const rolls = (fmt, platform) => ({
         removeImport("src/main/wasm/highwayhasher_wasm.js");
         removeImport("src/main/wasm-simd/highwayhasher_wasm.js");
         if (fmt === "cjs" && platform === "node") {
+          fs.mkdirSync(path.resolve(__dirname, "dist/node"), { recursive: true });
           distributeSharedNode();
+
+          // Copy over our wasm bundles to each out directory as a known name to
+          // downstream users so that they can access the wasm payloads directly
+          // as needed.
+          fs.copyFileSync(
+            "src/main/wasm/highwayhasher_wasm_bg.wasm",
+            "dist/highwayhasher_wasm_bg.wasm"
+          );
+          fs.copyFileSync(
+            "src/main/wasm-simd/highwayhasher_wasm_bg.wasm",
+            "dist/highwayhasher_wasm_simd_bg.wasm"
+          );
         }
       },
     },
@@ -67,7 +80,6 @@ const distributeSharedNode = () => {
     __dirname,
     `dist/node/${pkg.name}-${process.env.TARGET || defaultTriple()}.node`
   );
-  fs.mkdirSync(path.resolve(__dirname, "dist/node"), { recursive: true });
   fs.copyFileSync(input, output);
 };
 

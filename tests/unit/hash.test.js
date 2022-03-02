@@ -17,7 +17,7 @@ const keyData = Uint8Array.from([
 beforeEach(() => {
   HighwayHash.resetModule();
   WasmHighwayHash.resetModule();
-})
+});
 
 it("choose hash implementation depending on platform", () => {
   if (isNode()) {
@@ -150,9 +150,8 @@ if (!hasWasmSimd() && isNode()) {
     try {
       await WasmHighwayHash.loadModule({ simd: true });
       fail("Should have thrown exception");
-    } catch (e) {
-    }
-  })
+    } catch (e) {}
+  });
 } else if (hasWasmSimd()) {
   it("should hash with Wasm SIMD forced", async () => {
     const mod = await WasmHighwayHash.loadModule({ simd: true });
@@ -160,5 +159,37 @@ if (!hasWasmSimd() && isNode()) {
     let out = hash.finalize64();
     let expected = Uint8Array.from([105, 68, 213, 185, 117, 218, 53, 112]);
     expect(out).toEqual(expected);
-  })
+  });
+}
+
+// Test if node so that we can more easily instantiate the wasm module
+if (isNode()) {
+  it("should accept wasm module", async () => {
+    const { readFile } = require("fs").promises;
+    const wasmData = await readFile("src/main/wasm/highwayhasher_wasm_bg.wasm");
+    const module = new WebAssembly.Module(wasmData);
+    const mod = await WasmHighwayHash.loadModule({ wasm: module });
+    const hash = mod.create();
+    const out = hash.finalize64();
+    const expected = Uint8Array.from([105, 68, 213, 185, 117, 218, 53, 112]);
+    expect(out).toEqual(expected);
+  });
+
+  it("should accept wasm module object", async () => {
+    const { readFile } = require("fs").promises;
+    const sisdData = await readFile("src/main/wasm/highwayhasher_wasm_bg.wasm");
+    const simdData = await readFile(
+      "src/main/wasm-simd/highwayhasher_wasm_bg.wasm"
+    );
+    const mod = await WasmHighwayHash.loadModule({
+      wasm: {
+        sisd: sisdData,
+        simd: simdData,
+      },
+    });
+    const hash = mod.create();
+    const out = hash.finalize64();
+    const expected = Uint8Array.from([105, 68, 213, 185, 117, 218, 53, 112]);
+    expect(out).toEqual(expected);
+  });
 }

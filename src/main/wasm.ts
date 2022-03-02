@@ -8,13 +8,13 @@ import wasm from "./wasm/highwayhasher_wasm_bg.wasm";
 import wasmSimd from "./wasm-simd/highwayhasher_wasm_bg.wasm";
 
 class WasmHash extends WasmHighway implements IHash {
-  constructor(key: Uint8Array | null | undefined) {
+  constructor(key?: Uint8Array | null | undefined) {
     super(validKey(key));
   }
 }
 
 class WasmSimdHash extends WasmSimdHighway implements IHash {
-  constructor(key: Uint8Array | null | undefined) {
+  constructor(key?: Uint8Array | null | undefined) {
     super(validKey(key));
   }
 }
@@ -74,7 +74,7 @@ export class WasmHighwayHash {
   }
 
   static async load(
-    key: Uint8Array | null | undefined,
+    key?: Uint8Array | null | undefined,
     options?: Partial<HighwayLoadOptions>
   ): Promise<IHash> {
     const module = await WasmHighwayHash.loadModule(options);

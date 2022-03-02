@@ -23,5 +23,7 @@ const keyData = Uint8Array.from([
   const out3: Uint8Array = hasher3.finalize64();
   console.log(out3);
 
+  const hasher4 = mod.create();
+
   await WasmHighwayHash.loadModule({ simd: true });
 })();

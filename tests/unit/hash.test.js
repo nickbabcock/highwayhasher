@@ -32,16 +32,16 @@ for (let i = 0; i < parameters.length; i++) {
   const name = parameters[i][0];
   const Hash = parameters[i][1];
   describe(`${name} incremental hash`, () => {
-    it("load and create hash", async () => {
-      const mod = await Hash.loadModule();
-      const hash = mod.create();
+    it("keyless and dataless 64bit", async () => {
+      const hash = await Hash.load();
       let out = hash.finalize64();
       let expected = Uint8Array.from([105, 68, 213, 185, 117, 218, 53, 112]);
       expect(out).toEqual(expected);
     });
 
-    it("keyless and dataless 64bit", async () => {
-      const hash = await Hash.load();
+    it("load and create hash", async () => {
+      const mod = await Hash.loadModule();
+      const hash = mod.create();
       let out = hash.finalize64();
       let expected = Uint8Array.from([105, 68, 213, 185, 117, 218, 53, 112]);
       expect(out).toEqual(expected);

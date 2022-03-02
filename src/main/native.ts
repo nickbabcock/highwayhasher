@@ -73,8 +73,9 @@ export class NativeHighwayHash {
 
   static async load(
     key: Uint8Array | null | undefined,
-    _options?: Partial<HighwayLoadOptions>
+    options?: Partial<HighwayLoadOptions>
   ): Promise<IHash> {
-    return new NativeHash(key);
+    const mod = await NativeHighwayHash.loadModule(options);
+    return mod.create(key);
   }
 }

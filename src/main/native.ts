@@ -78,4 +78,9 @@ export class NativeHighwayHash {
     const mod = await NativeHighwayHash.loadModule(options);
     return mod.create(key);
   }
+
+  static resetModule() {
+    native = undefined;
+    InternalHasher = undefined;
+  }
 }

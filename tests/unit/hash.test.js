@@ -14,6 +14,11 @@ const keyData = Uint8Array.from([
   22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
 ]);
 
+beforeEach(() => {
+  HighwayHash.resetModule();
+  WasmHighwayHash.resetModule();
+})
+
 it("choose hash implementation depending on platform", () => {
   if (isNode()) {
     expect(HighwayHash.name).toEqual("NativeHighwayHash");
@@ -32,16 +37,16 @@ for (let i = 0; i < parameters.length; i++) {
   const name = parameters[i][0];
   const Hash = parameters[i][1];
   describe(`${name} incremental hash`, () => {
-    it("keyless and dataless 64bit", async () => {
-      const hash = await Hash.load();
+    it("load and create hash", async () => {
+      const mod = await Hash.loadModule();
+      const hash = mod.create();
       let out = hash.finalize64();
       let expected = Uint8Array.from([105, 68, 213, 185, 117, 218, 53, 112]);
       expect(out).toEqual(expected);
     });
 
-    it("load and create hash", async () => {
-      const mod = await Hash.loadModule();
-      const hash = mod.create();
+    it("keyless and dataless 64bit", async () => {
+      const hash = await Hash.load();
       let out = hash.finalize64();
       let expected = Uint8Array.from([105, 68, 213, 185, 117, 218, 53, 112]);
       expect(out).toEqual(expected);

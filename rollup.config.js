@@ -1,4 +1,4 @@
-import { wasm } from "@rollup/plugin-wasm";
+import { wasm } from "@nickbabcock/plugin-wasm";
 import typescript from "@rollup/plugin-typescript";
 import pkg from "./package.json";
 import path from "path";
@@ -6,34 +6,34 @@ import { execSync } from "child_process";
 import os from "os";
 import fs from "fs";
 
-const rolls = (fmt, platform) => ({
-  input: `src/main/index_${platform}.ts`,
+const outdir = (fmt, platform, inline) =>
+  `dist/${platform}${inline ? `-${inline}` : ""}/${fmt}`;
+
+const rolls = (fmt, platform, inline) => ({
+  input: `src/main/index_${platform}${inline ? `_${inline}` : ""}.ts`,
   output: {
-    dir: `dist/${platform}/${fmt}`,
+    dir: outdir(fmt, platform, inline),
     format: fmt,
+    entryFileNames: `[name].${fmt === "cjs" ? "cjs" : "js"}`,
     name: pkg.name,
   },
   external: ["os"],
   plugins: [
-    wasm({ maxFileSize: platform === "node" ? 0 : 100000000 }),
-    typescript({ outDir: `dist/${platform}/${fmt}` }),
+    inline !== "slim" &&
+      wasm(
+        platform === "node"
+          ? { maxFileSize: 0, targetEnv: "node" }
+          : { targetEnv: "auto-inline" }
+      ),
+    typescript({ outDir: outdir(fmt, platform, inline) }),
     {
       name: "custom",
+      resolveImportMeta: () => `""`,
       generateBundle() {
-        // Remove the `import` bundler directive that wasm-bindgen spits out as webpack < 5
-        // doesn't understand that directive
-        const removeImport = (fp) => {
-          const data = fs.readFileSync(path.resolve(fp), "utf8");
-          fs.writeFileSync(
-            path.resolve(fp),
-            data.replace("import.meta.url", "input")
-          );
-        };
-
-        removeImport("src/main/wasm/highwayhasher_wasm.js");
-        removeImport("src/main/wasm-simd/highwayhasher_wasm.js");
         if (fmt === "cjs" && platform === "node") {
-          fs.mkdirSync(path.resolve(__dirname, "dist/node"), { recursive: true });
+          fs.mkdirSync(path.resolve(__dirname, "dist/node"), {
+            recursive: true,
+          });
           distributeSharedNode();
 
           // Copy over our wasm bundles to each out directory as a known name to
@@ -84,8 +84,11 @@ const distributeSharedNode = () => {
 };
 
 export default [
+  rolls("umd", "browser", "fat"),
   rolls("cjs", "node"),
   rolls("es", "node"),
-  rolls("cjs", "browser"),
-  rolls("es", "browser"),
+  rolls("cjs", "browser", "fat"),
+  rolls("es", "browser", "fat"),
+  rolls("cjs", "browser", "slim"),
+  rolls("es", "browser", "slim"),
 ];

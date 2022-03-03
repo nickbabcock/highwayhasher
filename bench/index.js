@@ -1,4 +1,4 @@
-const { WasmHighwayHash, HighwayHash } = require("..");
+const { WasmHighwayHash, HighwayHash } = require("highwayhasher");
 const { asBuffer } = require("highwayhash");
 const { assert } = require("console");
 

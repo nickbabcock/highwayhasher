@@ -4,15 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "karmatic --coverage false hash.test.js"
+    "pretest": "cp ../unit/hash.test.js .",
+    "test": "karmatic --coverage false hash.test.js",
+    "posttest": "rm hash.test.js"
   },
   "keywords": [],
   "author": "Nick Babcock",
   "license": "MIT",
   "devDependencies": {
-    "jest": "^26.6.0",
     "karmatic": "^2.1.0",
     "puppeteer": "^5.4.0",
     "webpack": "^4.44.2"
+  },
+  "dependencies": {
+    "highwayhasher": "file:../.."
   }
 }

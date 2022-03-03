@@ -10,8 +10,16 @@ import init, { WasmHighway } from "./wasm/highwayhasher_wasm";
 import simdInit, {
   WasmHighway as WasmSimdHighway,
 } from "./wasm-simd/highwayhasher_wasm";
-import wasm from "./wasm/highwayhasher_wasm_bg.wasm";
-import wasmSimd from "./wasm-simd/highwayhasher_wasm_bg.wasm";
+
+let wasmInit: (() => InitInput) | undefined = undefined;
+export const setWasmInit = (arg: () => InitInput) => {
+  wasmInit = arg;
+};
+
+let wasmSimdInit: (() => InitInput) | undefined = undefined;
+export const setWasmSimdInit = (arg: () => InitInput) => {
+  wasmSimdInit = arg;
+};
 
 class WasmHash extends WasmHighway implements IHash {
   constructor(key?: Uint8Array | null | undefined) {
@@ -110,7 +118,7 @@ let wasmSimdInitialized = false;
 const loadWasmSimd = async (module?: InitInput) => {
   if (!wasmSimdInitialized) {
     // @ts-ignore
-    await simdInit(module ?? wasmSimd());
+    await simdInit(module ?? wasmSimdInit());
     wasmSimdInitialized = true;
   }
 };
@@ -118,7 +126,7 @@ const loadWasmSimd = async (module?: InitInput) => {
 const loadWasm = async (module?: InitInput) => {
   if (!wasmInitialized) {
     // @ts-ignore
-    await init(module ?? wasm());
+    await init(module ?? wasmInit());
     wasmInitialized = true;
   }
 };

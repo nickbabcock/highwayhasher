@@ -1,5 +1,6 @@
 {
   "include": ["src"],
+  "exclude": ["node_modules"],
   "compilerOptions": {
     "target": "ES2017",
     // what follows is from the tsdx project

@@ -1,4 +1,10 @@
-import type { HashCreator, HighwayLoadOptions, IHash } from "./model";
+import type {
+  HashCreator,
+  HighwayLoadOptions,
+  IHash,
+  InitInput,
+  WasmInput,
+} from "./model";
 import { validKey } from "./common";
 import init, { WasmHighway } from "./wasm/highwayhasher_wasm";
 import simdInit, {
@@ -63,13 +69,25 @@ export class WasmHighwayHash {
   static async loadModule(
     options?: Partial<HighwayLoadOptions>
   ): Promise<HashCreator> {
-    const useSimd = options?.simd ?? hasSimd();
-    if (!useSimd) {
-      await loadWasm();
-      return WasmModule;
+    if (
+      options?.wasm === undefined ||
+      (typeof options.wasm === "object" && "simd" in options.wasm)
+    ) {
+      // Trust me, typescript, if the above conditional succeeds
+      // the type should narrow to the following
+      const wasm = options?.wasm as WasmInput | undefined;
+
+      const useSimd = options?.simd ?? hasSimd();
+      if (!useSimd) {
+        await loadWasm(wasm?.sisd);
+        return WasmModule;
+      } else {
+        await loadWasmSimd(wasm?.simd);
+        return WasmSimdModule;
+      }
     } else {
-      await loadWasmSimd();
-      return WasmSimdModule;
+      await loadWasm(options.wasm);
+      return WasmModule;
     }
   }
 
@@ -89,18 +107,18 @@ export class WasmHighwayHash {
 
 let wasmInitialized = false;
 let wasmSimdInitialized = false;
-const loadWasmSimd = async () => {
+const loadWasmSimd = async (module?: InitInput) => {
   if (!wasmSimdInitialized) {
     // @ts-ignore
-    await simdInit(wasmSimd());
+    await simdInit(module ?? wasmSimd());
     wasmSimdInitialized = true;
   }
 };
 
-const loadWasm = async () => {
+const loadWasm = async (module?: InitInput) => {
   if (!wasmInitialized) {
     // @ts-ignore
-    await init(wasm());
+    await init(module ?? wasm());
     wasmInitialized = true;
   }
 };

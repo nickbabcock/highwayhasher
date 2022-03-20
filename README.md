@@ -45,7 +45,7 @@ let expected = Uint8Array.from([120, 221, 205, 199, 170, 67, 171, 126]);
 expect(out).toEqual(expected);
 ```
 
-That's it! Now your program will use native code on nodejs and Wasm in the browser (when bundled by webpack, rollup, or any other javascript bundler that respects [the `browser` package.json spec](https://github.com/defunctzombie/package-browser-field-spec)) without any bloat!
+That's it! Now your program will use native code on nodejs and Wasm in the browser!
 
 ## Non-Streaming API
 
@@ -71,4 +71,34 @@ hash.append(Uint8Array.from([0]));
 let out = hash.finalize64();
 let expected = Uint8Array.from([120, 221, 205, 199, 170, 67, 171, 126]);
 expect(out).toEqual(expected);
+```
+
+## Slim Module
+
+By default, the `highwayhasher` entrypoint includes Wasm that is base64 inlined. This is the default as most developers will probably not need to care. However some developers will care: those running the library in environments where Wasm is executable but not compilable, or those who are ambitious about reducing compute and bandwidth costs for their users.
+
+To cater to these use cases, there is a `highwayhasher/slim` package that operates the exactly the same, except now it is expected for developers to prime initialization through some other means.
+
+If you know the environment has Wasm SIMD enabled (for instance, deploying on Cloudflare workers):
+
+```js
+import { HighwayHash } from "highwayhasher/slim";
+import wasm from "highwayhasher/simd.wasm";
+
+const hasher = await HighwayHash.loadModule({ wasm });
+```
+
+If runtime detection of SIMD is preferred, both SIMD disabled and enabled modules can be referenced.
+
+```js
+import { HighwayHash } from "highwayhasher/slim";
+import simd from "highwayhasher/simd.wasm";
+import sisd from "highwayhasher/sisd.wasm";
+
+const hasher = await HighwayHash.loadModule({
+  wasm: {
+    simd,
+    sisd,
+  }
+});
 ```

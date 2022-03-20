@@ -7,6 +7,7 @@
   "author": "Nick Babcock",
   "license": "MIT",
   "dependencies": {
-    "highwayhash": "^3.1.1"
+    "highwayhash": "^3.1.1",
+    "highwayhasher": "file:.."
   }
 }

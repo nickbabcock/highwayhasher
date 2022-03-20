@@ -1,3 +1,12 @@
+## v0.3.0 - 2022-03-20
+
+- Add Neon SIMD implementation for aarch64 targets which enabled throughput improvements of over 4x. The downside with this implementation is that all aarch64 environments are assumed to support NEON SIMD. Thus, aarch64 environments without NEON SIMD are not supported.
+- Add control over how Wasm is intantiated (from URL, buffer, etc).
+- Add `/slim` package entrypoint where Wasm is not base64 inlined
+- Add `HighwayHash.resetModule` if module needs to be reinitializated (it shouldn't)
+- Allow the hash key to be omitted as an argument when creating a hasher.
+- Fix `HighwayHash.load` executing incorrectly on native platforms
+
 ## v0.2.1 - 2021-12-14
 
 Fix absence of node native modules in distribution

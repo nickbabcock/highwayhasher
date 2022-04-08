@@ -15,7 +15,7 @@ HighwayHasher is JS bindings to the [Rust implementation](https://github.com/nic
 - ✔ Accessible: Prebuilt native modules means no build dependencies
 - ✔ Completeness: Generate 64, 128, and 256bit hashes
 - ✔ Incremental: Hash data incrementally
-- ✔ Small: Less than 20kB when minified and gzipped
+- ✔ Small: Less than 20kB when minified and gzipped (or 10KB when using the [slim entrypoint](#slim-module))
 
 ## Install
 

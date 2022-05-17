@@ -1,5 +1,5 @@
-import { wasm } from "@nickbabcock/plugin-wasm";
 import typescript from "@rollup/plugin-typescript";
+import { wasm } from "@rollup/plugin-wasm";
 import pkg from "./package.json";
 import path from "path";
 import { execSync } from "child_process";

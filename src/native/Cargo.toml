@@ -16,4 +16,4 @@ napi-derive = "2"
 common = { path = "../common" }
 
 [build-dependencies]
-napi-build = "1"
+napi-build = "2"

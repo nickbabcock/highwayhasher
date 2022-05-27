@@ -147,10 +147,9 @@ for (let i = 0; i < parameters.length; i++) {
 if (!hasWasmSimd() && isNode()) {
   // Seemingly can only catch this on node.js
   it("should throw on Wasm SIMD forced", async () => {
-    try {
-      await WasmHighwayHash.loadModule({ simd: true });
-      fail("Should have thrown exception");
-    } catch (e) {}
+    await expect(WasmHighwayHash.loadModule({ simd: true })).rejects.toThrow(
+      "invalid value type 'Simd128', enable with"
+    );
   });
 } else if (hasWasmSimd()) {
   it("should hash with Wasm SIMD forced", async () => {

@@ -46,8 +46,8 @@
     "optimize": "wasm-opt -Os src/main/wasm/highwayhasher_wasm_bg.wasm -o tmp.wasm && mv tmp.wasm src/main/wasm/highwayhasher_wasm_bg.wasm && wasm-opt -Os src/main/wasm-simd/highwayhasher_wasm_bg.wasm -o tmp.wasm && mv tmp.wasm src/main/wasm-simd/highwayhasher_wasm_bg.wasm",
     "test": "npm run build && npm run test:inplace",
     "test:inplace": "npm run test:native && npm run test:types",
-    "test:types": "tsc --noEmit tests/unit/usage.ts",
-    "test:native": "vitest run",
+    "test:types": "tsc --outDir out",
+    "test:native": "vitest run --dir tests/unit",
     "prepublishOnly": "npm test && npm run optimize && ./assets/download-releases.sh && npm run build:bundle"
   },
   "keywords": [
@@ -64,7 +64,7 @@
     "@types/node": "^17.0.34",
     "rollup": "^2.73.0",
     "tslib": "^2.4.0",
-    "typescript": "^4.6.4",
-    "vitest": "^0.12.6"
+    "typescript": "^4.7.2",
+    "vitest": "^0.12.9"
   }
 }

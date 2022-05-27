@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "pretest": "cp ../unit/hash.test.js .",
+    "pretest": "cp ../../out/tests/unit/hash.test.js .",
     "test": "karmatic --coverage false hash.test.js",
     "posttest": "rm hash.test.js"
   },

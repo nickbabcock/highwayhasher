@@ -6,6 +6,7 @@
     "type": "git",
     "url": "git://github.com/nickbabcock/highwayhasher.git"
   },
+  "sideEffects": false,
   "type": "module",
   "main": "./dist/browser-fat/umd/index_browser_fat.js",
   "module": "./dist/browser-fat/es/index_browser_fat.js",

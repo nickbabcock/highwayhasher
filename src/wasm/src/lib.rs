@@ -4,9 +4,6 @@ use common::{data_to_lanes, u64_slice_to_u8};
 use highway::{HighwayHash, HighwayHasher, Key};
 use wasm_bindgen::prelude::*;
 
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
 #[wasm_bindgen]
 pub struct WasmHighway {
     inner: HighwayHasher,

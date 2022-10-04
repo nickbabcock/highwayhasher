@@ -1,3 +1,5 @@
+#![no_std]
+
 use common::{data_to_lanes, u64_slice_to_u8};
 use highway::{HighwayHash, HighwayHasher, Key};
 use wasm_bindgen::prelude::*;

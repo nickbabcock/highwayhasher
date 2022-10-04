@@ -5,7 +5,7 @@ use highway::{HighwayHash, HighwayHasher, Key};
 use wasm_bindgen::prelude::*;
 
 #[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+static ALLOCATOR: lol_alloc::FreeListAllocator = lol_alloc::FreeListAllocator::new();
 
 #[wasm_bindgen]
 pub struct WasmHighway {

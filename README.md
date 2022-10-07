@@ -15,7 +15,7 @@ HighwayHasher is JS bindings to the [Rust implementation](https://github.com/nic
 - ✔ Accessible: Prebuilt native modules means no build dependencies
 - ✔ Completeness: Generate 64, 128, and 256bit hashes
 - ✔ Incremental: Hash data incrementally
-- ✔ Small: Less than 20kB when minified and gzipped (or 10KB when using the [slim entrypoint](#slim-module))
+- ✔ Small: Less than 10 KB when minified and gzipped (or 5 KB when using the [slim entrypoint](#slim-module))
 
 ## Install
 
@@ -72,6 +72,8 @@ let out = hash.finalize64();
 let expected = Uint8Array.from([120, 221, 205, 199, 170, 67, 171, 126]);
 expect(out).toEqual(expected);
 ```
+
+Do note that there is a max number to concurrent Wasm hashers. It is currently 292 instances. If this is believed to be a significant limitation, open an issue so we can discuss it!   
 
 ## Slim Module
 

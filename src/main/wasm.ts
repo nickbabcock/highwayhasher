@@ -6,9 +6,19 @@ import type {
   WasmInput,
 } from "./model";
 import { validKey } from "./common";
-import init, { WasmHighway } from "./wasm/highwayhasher_wasm";
+import init, {
+  new_hasher as newWasmHighway,
+  append as sisdAppend,
+  finalize64 as sisdFinalize64,
+  finalize128 as sisdFinalize128,
+  finalize256 as sisdFinalize256,
+} from "./wasm/highwayhasher_wasm";
 import simdInit, {
-  WasmHighway as WasmSimdHighway,
+  new_hasher as newSimdHighway,
+  append as simdAppend,
+  finalize64 as simdFinalize64,
+  finalize128 as simdFinalize128,
+  finalize256 as simdFinalize256,
 } from "./wasm-simd/highwayhasher_wasm";
 
 let wasmInit: (() => InitInput) | undefined = undefined;
@@ -20,55 +30,6 @@ let wasmSimdInit: (() => InitInput) | undefined = undefined;
 export const setWasmSimdInit = (arg: () => InitInput) => {
   wasmSimdInit = arg;
 };
-
-class WasmHash extends WasmHighway implements IHash {
-  constructor(key?: Uint8Array | null | undefined) {
-    super(validKey(key));
-  }
-}
-
-class WasmSimdHash extends WasmSimdHighway implements IHash {
-  constructor(key?: Uint8Array | null | undefined) {
-    super(validKey(key));
-  }
-}
-
-const createModule = (
-  create: (key: Uint8Array | null | undefined) => IHash
-): HashCreator => {
-  return {
-    create,
-    hash64: (
-      key: Uint8Array | null | undefined,
-      data: Uint8Array
-    ): Uint8Array => {
-      const hasher = create(key);
-      hasher.append(data);
-      return hasher.finalize64();
-    },
-
-    hash128: (
-      key: Uint8Array | null | undefined,
-      data: Uint8Array
-    ): Uint8Array => {
-      const hasher = create(key);
-      hasher.append(data);
-      return hasher.finalize128();
-    },
-
-    hash256: (
-      key: Uint8Array | null | undefined,
-      data: Uint8Array
-    ): Uint8Array => {
-      const hasher = create(key);
-      hasher.append(data);
-      return hasher.finalize256();
-    },
-  };
-};
-
-export const WasmModule = createModule((key) => new WasmHash(key));
-export const WasmSimdModule = createModule((key) => new WasmSimdHash(key));
 
 /**
  * A Highway hasher implemented in Web assembly.
@@ -87,15 +48,12 @@ export class WasmHighwayHash {
 
       const useSimd = options?.simd ?? hasSimd();
       if (!useSimd) {
-        await loadWasm(wasm?.sisd);
-        return WasmModule;
+        return await loadWasm(wasm?.sisd);
       } else {
-        await loadWasmSimd(wasm?.simd);
-        return WasmSimdModule;
+        return await loadWasmSimd(wasm?.simd);
       }
     } else {
-      await loadWasm(options.wasm);
-      return WasmModule;
+      return await loadWasm(options.wasm);
     }
   }
 
@@ -108,27 +66,164 @@ export class WasmHighwayHash {
   }
 
   static resetModule() {
-    wasmInitialized = false;
-    wasmSimdInitialized = false;
+    sisdMemory = undefined;
+    simdMemory = undefined;
   }
 }
 
-let wasmInitialized = false;
-let wasmSimdInitialized = false;
-const loadWasmSimd = async (module?: InitInput) => {
-  if (!wasmSimdInitialized) {
-    // @ts-ignore
-    await simdInit(module ?? wasmSimdInit());
-    wasmSimdInitialized = true;
+const PAGE_SIZE = 65536;
+class Allocator {
+  private slots: boolean[] = [];
+  constructor(public memory: WebAssembly.Memory, private offset: number) {}
+  newAllocation() {
+    for (let i = 0; i < this.slots.length; i++) {
+      if (this.slots[i] === false) {
+        this.slots[i] = true;
+        return i;
+      }
+    }
+
+    const result = this.slots.length;
+    this.slots.push(true);
+    return result;
   }
+
+  returnSlot(slot: number) {
+    this.slots[slot] = false;
+  }
+
+  appendBufferOffset() {
+    return this.offset;
+  }
+
+  resultBufferOffset = this.appendBufferOffset;
+  keyBufferOffset = this.resultBufferOffset;
+}
+
+interface HashStrategy {
+  new_hasher: (key_data_ptr: number, key_len: number, idx: number) => number;
+  append: (data_ptr: number, data_len: number, idx: number) => void;
+  finalize64: (data_ptr: number, idx: number) => void;
+  finalize128: (data_ptr: number, idx: number) => void;
+  finalize256: (data_ptr: number, idx: number) => void;
+}
+
+function wasmHighway(alloc: Allocator, hasher: HashStrategy): HashCreator {
+  const WasmHash = class implements IHash {
+    readonly idx: number;
+    constructor(key: Uint8Array | null | undefined) {
+      key = validKey(key);
+      this.idx = alloc.newAllocation();
+      const offset = alloc.keyBufferOffset();
+      const keyDest = new Uint8Array(alloc.memory.buffer, offset);
+      keyDest.set(key ?? new Uint8Array());
+      const hasherSlot = hasher.new_hasher(
+        offset,
+        key?.byteLength ?? 0,
+        this.idx
+      );
+      if (hasherSlot !== this.idx) {
+        throw new Error("unable to allocate hasher in slot");
+      }
+    }
+
+    append(data: Uint8Array) {
+      while (data.length != 0) {
+        const toWrite = Math.min(data.length, PAGE_SIZE);
+        const source = data.subarray(0, toWrite);
+        const dataOffset = alloc.appendBufferOffset();
+        (new Uint8Array(alloc.memory.buffer, dataOffset, toWrite)).set(source);
+        hasher.append(dataOffset, toWrite, this.idx);
+        data = data.subarray(toWrite);
+      }
+    }
+
+    finalize64(): Uint8Array {
+      const resultOffset = alloc.resultBufferOffset();
+      hasher.finalize64(resultOffset, this.idx);
+      const out = new Uint8Array(alloc.memory.buffer, resultOffset, 8);
+      const result = new Uint8Array(8);
+      result.set(out);
+      alloc.returnSlot(this.idx);
+      return result;
+    }
+
+    finalize128(): Uint8Array {
+      const resultOffset = alloc.resultBufferOffset();
+      hasher.finalize128(resultOffset, this.idx);
+      const out = new Uint8Array(alloc.memory.buffer, resultOffset, 16);
+      const result = new Uint8Array(16);
+      result.set(out);
+      alloc.returnSlot(this.idx);
+      return result;
+    }
+
+    finalize256(): Uint8Array {
+      const resultOffset = alloc.resultBufferOffset();
+      hasher.finalize256(resultOffset, this.idx);
+      const out = new Uint8Array(alloc.memory.buffer, resultOffset, 32);
+      const result = new Uint8Array(32);
+      result.set(out);
+      alloc.returnSlot(this.idx);
+      return result;
+    }
+  };
+
+  return {
+    create: (key) => new WasmHash(key),
+    hash64(key, data) {
+      const hasher = new WasmHash(key);
+      hasher.append(data);
+      return hasher.finalize64();
+    },
+    hash128(key, data) {
+      const hasher = new WasmHash(key);
+      hasher.append(data);
+      return hasher.finalize128();
+    },
+    hash256(key, data) {
+      const hasher = new WasmHash(key);
+      hasher.append(data);
+      return hasher.finalize256();
+    },
+  };
+}
+
+let sisdMemory: Promise<HashCreator> | undefined;
+let simdMemory: Promise<HashCreator> | undefined;
+const loadWasmSimd = async (module?: InitInput) => {
+  if (simdMemory === undefined) {
+    simdMemory = simdInit(module ?? wasmSimdInit()).then((x) => {
+      const prevLength = x.memory.grow(1);
+      const alloc = new Allocator(x.memory, prevLength);
+      return wasmHighway(alloc, {
+        new_hasher: newSimdHighway,
+        append: simdAppend,
+        finalize64: simdFinalize64,
+        finalize128: simdFinalize128,
+        finalize256: simdFinalize256,
+      });
+    });
+  }
+  return await simdMemory;
 };
 
 const loadWasm = async (module?: InitInput) => {
-  if (!wasmInitialized) {
-    // @ts-ignore
-    await init(module ?? wasmInit());
-    wasmInitialized = true;
+  if (sisdMemory === undefined) {
+    sisdMemory = init(module ?? wasmInit()).then((x) => {
+      // grow by 1 page to hold key, results, and data hashing
+      const prevLength = x.memory.grow(1);
+      const alloc = new Allocator(x.memory, prevLength);
+      return wasmHighway(alloc, {
+        new_hasher: newWasmHighway,
+        append: sisdAppend,
+        finalize64: sisdFinalize64,
+        finalize128: sisdFinalize128,
+        finalize256: sisdFinalize256,
+      });
+    });
   }
+  return await sisdMemory;
 };
 
 // Extracted from the compiled file of:

@@ -15,4 +15,4 @@ jobs:
     - uses: preactjs/compressed-size-action@v2
       with:
        build-script: "compressed-size"
-       pattern: "dist/{highwayhasher_wasm_bg.wasm,highwayhasher_wasm_simd_bg.wasm,browser-fat/es/index_browser_fat.js}"
+       pattern: "dist/{highwayhasher_wasm_bg.wasm,highwayhasher_wasm_simd_bg.wasm,browser-fat/es/index_browser_fat.js,browser-slim/es/index_browser_slim.js}"

@@ -43,7 +43,7 @@
     "build:wasm": "wasm-pack build -t web --out-dir ../main/wasm src/wasm",
     "build:wasm-simd": "RUSTFLAGS='-C target-feature=+simd128' npm run build:wasm-simd-ci",
     "build:wasm-simd-ci": "wasm-pack build -t web --out-dir ../main/wasm-simd src/wasm",
-    "build:bundle": "rollup -c",
+    "build:bundle": "rollup -c --bundleConfigAsCjs",
     "compressed-size": "npm run build && find dist -iname '*.js' -exec npx terser@latest --compress --mangle --output {} -- {} \\;",
     "optimize": "wasm-opt -Os src/main/wasm/highwayhasher_wasm_bg.wasm -o tmp.wasm && mv tmp.wasm src/main/wasm/highwayhasher_wasm_bg.wasm && wasm-opt -Os src/main/wasm-simd/highwayhasher_wasm_bg.wasm -o tmp.wasm && mv tmp.wasm src/main/wasm-simd/highwayhasher_wasm_bg.wasm",
     "test": "npm run build && npm run test:inplace",
@@ -61,12 +61,12 @@
   "author": "Nick Babcock <nbabcock19@hotmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-typescript": "^8.5.0",
-    "@rollup/plugin-wasm": "^5.2.0",
-    "@types/node": "^18.7.23",
-    "rollup": "^2.79.1",
+    "@rollup/plugin-typescript": "^9.0.1",
+    "@rollup/plugin-wasm": "^6.0.0",
+    "@types/node": "^18.8.4",
+    "rollup": "^3.1.0",
     "tslib": "^2.4.0",
     "typescript": "^4.8.4",
-    "vitest": "^0.23.4"
+    "vitest": "^0.24.1"
   }
 }

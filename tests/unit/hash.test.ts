@@ -108,6 +108,18 @@ for (let i = 0; i < parameters.length; i++) {
       ]);
       expect(out).toEqual(expected);
     });
+
+    it("interleaved hashing", async () => {
+      const hash1 = await Hash.load();
+      const hash2 = await Hash.load(keyData);
+      hash2.append(Uint8Array.from([1]));
+      let out1 = hash1.finalize64();
+      const out2 = hash2.finalize64();
+      let expected1 = Uint8Array.from([105, 68, 213, 185, 117, 218, 53, 112]);
+      let expected2 = Uint8Array.from([85, 188, 95, 74, 133, 192, 47, 84]);
+      expect(out1).toEqual(expected1);
+      expect(out2).toEqual(expected2);
+    });
   });
 }
 

@@ -1,3 +1,10 @@
+## v0.4.0 - 2022-10-12
+
+- Major updates to the Wasm implementation:
+  - 70% reduction in size of Wasm module
+  - Up to a 2x throughput improvement when hashing small payloads (less than 100 bytes)
+  - Create limit of 292 Wasm instances
+
 ## v0.3.0 - 2022-03-20
 
 - Add Neon SIMD implementation for aarch64 targets which enabled throughput improvements of over 4x. The downside with this implementation is that all aarch64 environments are assumed to support NEON SIMD. Thus, aarch64 environments without NEON SIMD are not supported.

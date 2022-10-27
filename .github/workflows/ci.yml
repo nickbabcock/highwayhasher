@@ -40,7 +40,7 @@ jobs:
           target: armv7-unknown-linux-gnueabihf
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - name: Use Cross
       if: matrix.target != '' && matrix.os == 'ubuntu-latest'
       run: |
@@ -53,7 +53,7 @@ jobs:
         rustup target add ${{ matrix.target }}
         echo "TARGET=${{ matrix.target }}" >> $GITHUB_ENV
     - name: Use Node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node }}
     - name: Install wasm-pack
@@ -94,7 +94,7 @@ jobs:
       working-directory: dist/node
       run: |
         echo "ARTIFACT_NAME=$(echo highwayhasher*.node)" >> $GITHUB_ENV
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         path: dist/node/highwayhasher*.node
         name: ${{ env.ARTIFACT_NAME }}
@@ -104,8 +104,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/download-artifact@v2
+    - uses: actions/checkout@v3
+    - uses: actions/download-artifact@v3
       with:
         path: artifacts-temp
     - name: Flatten artifacts
@@ -115,7 +115,7 @@ jobs:
         ls -lR artifacts
     - name: Create Release
       if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-      uses: actions/github-script@v2
+      uses: actions/github-script@v6
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |

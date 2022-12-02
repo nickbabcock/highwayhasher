@@ -31,6 +31,11 @@ export const setWasmSimdInit = (arg: () => InitInput) => {
   wasmSimdInit = arg;
 };
 
+const isWasmInput = (
+  x?: HighwayLoadOptions["wasm"]
+): x is WasmInput | undefined =>
+  x === undefined || (typeof x === "object" && "simd" in x);
+
 /**
  * A Highway hasher implemented in Web assembly.
  */
@@ -38,19 +43,12 @@ export class WasmHighwayHash {
   static async loadModule(
     options?: Partial<HighwayLoadOptions>
   ): Promise<HashCreator> {
-    if (
-      options?.wasm === undefined ||
-      (typeof options.wasm === "object" && "simd" in options.wasm)
-    ) {
-      // Trust me, typescript, if the above conditional succeeds
-      // the type should narrow to the following
-      const wasm = options?.wasm as WasmInput | undefined;
-
+    if (isWasmInput(options?.wasm)) {
       const useSimd = options?.simd ?? hasSimd();
       if (!useSimd) {
-        return await loadWasm(wasm?.sisd);
+        return await loadWasm(options?.wasm?.sisd);
       } else {
-        return await loadWasmSimd(wasm?.simd);
+        return await loadWasmSimd(options?.wasm?.simd);
       }
     } else {
       return await loadWasm(options.wasm);
@@ -132,7 +130,7 @@ function wasmHighway(alloc: Allocator, hasher: HashStrategy): HashCreator {
         const toWrite = Math.min(data.length, PAGE_SIZE);
         const source = data.subarray(0, toWrite);
         const dataOffset = alloc.appendBufferOffset();
-        (new Uint8Array(alloc.memory.buffer, dataOffset, toWrite)).set(source);
+        new Uint8Array(alloc.memory.buffer, dataOffset, toWrite).set(source);
         hasher.append(dataOffset, toWrite, this.idx);
         data = data.subarray(toWrite);
       }

@@ -124,7 +124,7 @@ jobs:
           const { repo: { owner, repo }, sha } = context;
           console.log({ owner, repo, sha });
           const tag_name = process.env.GITHUB_REF.split("/")[2];
-          const release = await github.repos.createRelease({
+          const release = await github.rest.repos.createRelease({
             owner, repo,
             tag_name,
             draft: false,
@@ -136,7 +136,7 @@ jobs:
           for (let file of await fs.readdir('artifacts')) {
             console.log('uploading', file);
 
-            await github.repos.uploadReleaseAsset({
+            await github.rest.repos.uploadReleaseAsset({
               owner, repo,
               release_id: release.data.id,
               name: file,

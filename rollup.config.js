@@ -25,7 +25,7 @@ const rolls = (fmt, platform, inline) => ({
           ? { maxFileSize: 0, targetEnv: "node" }
           : { targetEnv: "auto-inline" }
       ),
-    typescript({ outDir: outdir(fmt, platform, inline) }),
+    typescript({ outDir: outdir(fmt, platform, inline), rootDir: "src" }),
     {
       name: "custom",
       resolveImportMeta: () => `""`,

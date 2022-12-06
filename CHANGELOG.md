@@ -1,3 +1,7 @@
+## v0.4.1 - 2022-12-05
+
+- Fix exported types
+
 ## v0.4.0 - 2022-10-12
 
 - Major updates to the Wasm implementation:

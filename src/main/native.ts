@@ -1,6 +1,6 @@
-import type { HashCreator, HighwayLoadOptions, IHash } from "./model";
+import type { HashCreator, HighwayLoadOptions, IHash } from "./model.js";
 import os from "os";
-import { validKey } from "./common";
+import { validKey } from "./common.js";
 
 const getTriple = (): string => {
   const platform = os.platform();
@@ -23,52 +23,56 @@ const getTriple = (): string => {
 };
 
 const MODULE_NAME = "highwayhasher";
-let native = undefined;
-let InternalHasher = undefined;
 
-class NativeHash implements IHash {
-  private inner: any;
-  constructor(key?: Uint8Array | null | undefined) {
-    this.inner = new InternalHasher(validKey(key));
-  }
-
-  static load = async (key: Uint8Array | null | undefined) =>
-    new NativeHash(key);
-  append = (data: Uint8Array): void => this.inner.append(data);
-  finalize64 = (): Uint8Array => new Uint8Array(this.inner.finalize64().buffer);
-  finalize128 = (): Uint8Array =>
-    new Uint8Array(this.inner.finalize128().buffer);
-  finalize256 = (): Uint8Array =>
-    new Uint8Array(this.inner.finalize256().buffer);
+interface NativeConstructor {
+  new (key: ArrayBufferLike): IHash;
 }
 
-export const NativeModule: HashCreator = class NativeModule {
-  static create = (key: Uint8Array | null | undefined): IHash =>
-    new NativeHash(key);
-  static hash64 = (
-    key: Uint8Array | null | undefined,
-    data: Uint8Array
-  ): Uint8Array => new Uint8Array(native.hash64(validKey(key), data).buffer);
-  static hash128 = (
-    key: Uint8Array | null | undefined,
-    data: Uint8Array
-  ): Uint8Array => new Uint8Array(native.hash128(validKey(key), data).buffer);
-  static hash256 = (
-    key: Uint8Array | null | undefined,
-    data: Uint8Array
-  ): Uint8Array => new Uint8Array(native.hash256(validKey(key), data).buffer);
+type HashModule = {
+  hash64: (key: ArrayBufferLike, data: ArrayBufferLike) => Buffer;
+  hash128: (key: ArrayBufferLike, data: ArrayBufferLike) => Buffer;
+  hash256: (key: ArrayBufferLike, data: ArrayBufferLike) => Buffer;
+  HighwayHasher: NativeConstructor;
 };
+
+let nativeHasher: HashCreator | undefined;
+function initializeNative(native: HashModule): HashCreator {
+  const NativeHash = class implements IHash {
+    private inner: IHash;
+    constructor(key: Uint8Array | null | undefined) {
+      this.inner = new native.HighwayHasher(validKey(key));
+    }
+
+    append = (data: Uint8Array): void => this.inner.append(data);
+    finalize64 = (): Uint8Array =>
+      new Uint8Array(this.inner.finalize64().buffer);
+    finalize128 = (): Uint8Array =>
+      new Uint8Array(this.inner.finalize128().buffer);
+    finalize256 = (): Uint8Array =>
+      new Uint8Array(this.inner.finalize256().buffer);
+  };
+
+  return {
+    create: (key) => new NativeHash(key),
+    hash64: (key, data) =>
+      new Uint8Array(native.hash64(validKey(key), data).buffer),
+    hash128: (key, data) =>
+      new Uint8Array(native.hash128(validKey(key), data).buffer),
+    hash256: (key, data) =>
+      new Uint8Array(native.hash256(validKey(key), data).buffer),
+  };
+}
 
 export class NativeHighwayHash {
   static async loadModule(
     _options?: Partial<HighwayLoadOptions>
   ): Promise<HashCreator> {
-    if (native === undefined) {
-      native = require(`../${MODULE_NAME}-${getTriple()}.node`);
-      InternalHasher = native.HighwayHasher;
+    if (nativeHasher === undefined) {
+      const native: HashModule = require(`./${MODULE_NAME}-${getTriple()}.node`);
+      nativeHasher = initializeNative(native);
     }
 
-    return NativeModule;
+    return nativeHasher;
   }
 
   static async load(
@@ -80,7 +84,6 @@ export class NativeHighwayHash {
   }
 
   static resetModule() {
-    native = undefined;
-    InternalHasher = undefined;
+    nativeHasher = undefined;
   }
 }

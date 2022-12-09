@@ -80,15 +80,6 @@ jobs:
       run: |
         npm install
         npm test
-    - name: strip linux builds
-      if: matrix.build == 'linux-gnu'
-      run: strip dist/node/*.node
-    - name: strip linux-aarch64 builds
-      if: matrix.build == 'linux-aarch64'
-      run: sudo apt-get install binutils-aarch64-linux-gnu && aarch64-linux-gnu-strip dist/node/*.node
-    - name: strip linux-armv7 builds
-      if: matrix.build == 'linux-armv7'
-      run: sudo apt-get install binutils-arm-linux-gnueabihf && arm-linux-gnueabihf-strip dist/node/*.node
     - name: Set artifact name
       shell: bash
       working-directory: dist/node

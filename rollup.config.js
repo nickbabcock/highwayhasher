@@ -6,15 +6,22 @@ import { execSync } from "child_process";
 import os from "os";
 import fs from "fs";
 
-const outdir = (fmt, platform, inline) =>
-  `dist/${platform}${inline ? `-${inline}` : ""}/${fmt}`;
+const outdir = (fmt, platform, inline) => {
+  if (platform == "node") {
+    return `node`;
+  } else {
+    return `${platform}${inline ? `-${inline}` : ""}/${fmt}`;
+  }
+};
 
 const rolls = (fmt, platform, inline) => ({
   input: `src/main/index_${platform}${inline ? `_${inline}` : ""}.ts`,
   output: {
-    dir: outdir(fmt, platform, inline),
+    dir: "dist",
     format: fmt,
-    entryFileNames: `[name].${fmt === "cjs" ? "cjs" : "js"}`,
+    entryFileNames: `${outdir(fmt, platform, inline)}/[name].${
+      fmt === "cjs" ? "cjs" : "js"
+    }`,
     name: pkg.name,
   },
   external: ["os"],
@@ -22,15 +29,19 @@ const rolls = (fmt, platform, inline) => ({
     inline !== "slim" &&
       wasm(
         platform === "node"
-          ? { maxFileSize: 0, targetEnv: "node" }
+          ? { maxFileSize: 0, targetEnv: "node", publicPath: "../" }
           : { targetEnv: "auto-inline" }
       ),
-    typescript({ outDir: outdir(fmt, platform, inline), rootDir: "src" }),
+    typescript({
+      target: fmt == "es" ? "ES2022" : "ES2017",
+      outDir: `dist/${outdir(fmt, platform, inline)}`,
+      rootDir: "src",
+    }),
     {
       name: "custom",
       resolveImportMeta: () => `""`,
       generateBundle() {
-        if (fmt === "cjs" && platform === "node") {
+        if (platform === "node") {
           fs.mkdirSync(path.resolve(__dirname, "dist/node"), {
             recursive: true,
           });
@@ -86,7 +97,6 @@ const distributeSharedNode = () => {
 export default [
   rolls("umd", "browser", "fat"),
   rolls("cjs", "node"),
-  rolls("es", "node"),
   rolls("cjs", "browser", "fat"),
   rolls("es", "browser", "fat"),
   rolls("cjs", "browser", "slim"),

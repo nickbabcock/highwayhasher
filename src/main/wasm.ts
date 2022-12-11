@@ -4,8 +4,8 @@ import type {
   IHash,
   InitInput,
   WasmInput,
-} from "./model";
-import { validKey } from "./common";
+} from "./model.js";
+import { validKey } from "./common.js";
 import init, {
   new_hasher as newWasmHighway,
   append as sisdAppend,
@@ -51,7 +51,7 @@ export class WasmHighwayHash {
         return await loadWasmSimd(options?.wasm?.simd);
       }
     } else {
-      return await loadWasm(options.wasm);
+      return await loadWasm(options?.wasm);
     }
   }
 
@@ -191,7 +191,7 @@ let sisdMemory: Promise<HashCreator> | undefined;
 let simdMemory: Promise<HashCreator> | undefined;
 const loadWasmSimd = async (module?: InitInput) => {
   if (simdMemory === undefined) {
-    simdMemory = simdInit(module ?? wasmSimdInit()).then((x) => {
+    simdMemory = simdInit(module ?? wasmSimdInit?.()).then((x) => {
       const prevLength = x.memory.grow(1);
       const alloc = new Allocator(x.memory, prevLength);
       return wasmHighway(alloc, {
@@ -208,7 +208,7 @@ const loadWasmSimd = async (module?: InitInput) => {
 
 const loadWasm = async (module?: InitInput) => {
   if (sisdMemory === undefined) {
-    sisdMemory = init(module ?? wasmInit()).then((x) => {
+    sisdMemory = init(module ?? wasmInit?.()).then((x) => {
       // grow by 1 page to hold key, results, and data hashing
       const prevLength = x.memory.grow(1);
       const alloc = new Allocator(x.memory, prevLength);

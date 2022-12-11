@@ -76,7 +76,7 @@ jobs:
       run: npm run test:inplace
     - name: browser test
       working-directory: ./tests/e2e
-      if: matrix.target == ''
+      if: matrix.build == 'linux-gnu'
       run: |
         npm install
         npm test

@@ -23,7 +23,7 @@ it("choose hash implementation depending on platform", () => {
   if (isNode()) {
     expect(HighwayHash.name).toEqual("NativeHighwayHash");
   } else {
-    expect(HighwayHash.name).toEqual("WasmHighwayHash");
+    expect(HighwayHash.name).toContain("WasmHighwayHash");
   }
 });
 
@@ -31,7 +31,7 @@ it("choose hash implementation depending on platform", () => {
 const parameters = [
   ["impl", HighwayHash],
   ["wasm", WasmHighwayHash],
-];
+] as const;
 
 for (let i = 0; i < parameters.length; i++) {
   const name = parameters[i][0];

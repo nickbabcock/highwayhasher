@@ -1,3 +1,9 @@
+## v0.4.2 - 2022-12-11
+
+- Correctly author ESM types for `/slim` users
+- Bump target of output destined for bundlers to ES2022
+- Remove node ESM output as it mixes require and imports
+
 ## v0.4.1 - 2022-12-05
 
 - Fix exported types

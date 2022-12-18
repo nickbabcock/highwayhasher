@@ -177,7 +177,8 @@ if (!hasWasmSimd() && isNode()) {
 if (isNode()) {
   it("should accept wasm module", async () => {
     const { readFile } = require("fs").promises;
-    const wasmData = await readFile("src/main/wasm/highwayhasher_wasm_bg.wasm");
+    const pkg = require("highwayhasher/package.json");
+    const wasmData = await readFile(pkg.exports["./sisd.wasm"]);
     const module = new WebAssembly.Module(wasmData);
     const mod = await WasmHighwayHash.loadModule({ wasm: module });
     const hash = mod.create();
@@ -188,10 +189,9 @@ if (isNode()) {
 
   it("should accept wasm module object", async () => {
     const { readFile } = require("fs").promises;
-    const sisdData = await readFile("src/main/wasm/highwayhasher_wasm_bg.wasm");
-    const simdData = await readFile(
-      "src/main/wasm-simd/highwayhasher_wasm_bg.wasm"
-    );
+    const pkg = require("highwayhasher/package.json");
+    const sisdData = await readFile(pkg.exports["./sisd.wasm"]);
+    const simdData = await readFile(pkg.exports["./simd.wasm"]);
     const mod = await WasmHighwayHash.loadModule({
       wasm: {
         sisd: sisdData,

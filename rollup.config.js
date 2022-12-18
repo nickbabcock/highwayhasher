@@ -29,7 +29,12 @@ const rolls = (fmt, platform, inline) => ({
     inline !== "slim" &&
       wasm(
         platform === "node"
-          ? { maxFileSize: 0, targetEnv: "node", publicPath: "../" }
+        ? {
+          maxFileSize: 0,
+          targetEnv: "node",
+          publicPath: "../",
+          fileName: "[name][extname]",
+        }
           : { targetEnv: "auto-inline" }
       ),
     typescript({
@@ -46,18 +51,6 @@ const rolls = (fmt, platform, inline) => ({
             recursive: true,
           });
           distributeSharedNode();
-
-          // Copy over our wasm bundles to each out directory as a known name to
-          // downstream users so that they can access the wasm payloads directly
-          // as needed.
-          fs.copyFileSync(
-            "src/main/wasm/highwayhasher_wasm_bg.wasm",
-            "dist/highwayhasher_wasm_bg.wasm"
-          );
-          fs.copyFileSync(
-            "src/main/wasm-simd/highwayhasher_wasm_bg.wasm",
-            "dist/highwayhasher_wasm_simd_bg.wasm"
-          );
         }
       },
     },

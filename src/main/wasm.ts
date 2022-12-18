@@ -19,7 +19,7 @@ import simdInit, {
   finalize64 as simdFinalize64,
   finalize128 as simdFinalize128,
   finalize256 as simdFinalize256,
-} from "./wasm-simd/highwayhasher_wasm";
+} from "./wasm-simd/highwayhasher_wasm_simd";
 
 let wasmInit: (() => InitInput) | undefined = undefined;
 export const setWasmInit = (arg: () => InitInput) => {

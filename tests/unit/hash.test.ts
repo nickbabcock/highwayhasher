@@ -120,6 +120,15 @@ for (let i = 0; i < parameters.length; i++) {
       expect(out1).toEqual(expected1);
       expect(out2).toEqual(expected2);
     });
+
+    it("can append multiple times", async () => {
+      const hash = await Hash.load(keyData);
+      hash.append(Uint8Array.from([0]));
+      hash.append(Uint8Array.from([1]));
+      let out = hash.finalize64();
+      let expected = Uint8Array.from([98, 61, 181, 176, 154, 86, 208, 184]);
+      expect(out).toEqual(expected);
+    });
   });
 }
 

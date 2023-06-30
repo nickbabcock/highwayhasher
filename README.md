@@ -73,7 +73,7 @@ let expected = Uint8Array.from([120, 221, 205, 199, 170, 67, 171, 126]);
 expect(out).toEqual(expected);
 ```
 
-Do note that there is a max number to concurrent Wasm hashers. It is currently 292 instances. If this is believed to be a significant limitation, open an issue so we can discuss it!   
+Do note that there is a max number to concurrent Wasm hashers. It is currently 372 instances. If this is believed to be a significant limitation, open an issue so we can discuss it!   
 
 ## Slim Module
 

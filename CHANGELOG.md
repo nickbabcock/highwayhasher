@@ -1,3 +1,7 @@
+## v0.4.3 - 2023-06-30
+
+- Throughput increase of around 10%
+
 ## v0.4.2 - 2022-12-11
 
 - Correctly author ESM types for `/slim` users

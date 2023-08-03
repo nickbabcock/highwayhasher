@@ -47,9 +47,10 @@
     "compressed-size": "npm run build && find dist -iname '*.js' -exec npx terser@latest --compress --mangle --output {} -- {} \\;",
     "optimize": "wasm-opt -Os src/main/wasm/highwayhasher_wasm_bg.wasm -o tmp.wasm && mv tmp.wasm src/main/wasm/highwayhasher_wasm_bg.wasm && wasm-opt --enable-simd -Os src/main/wasm-simd/highwayhasher_wasm_simd_bg.wasm -o tmp.wasm && mv tmp.wasm src/main/wasm-simd/highwayhasher_wasm_simd_bg.wasm",
     "test": "npm run build && npm run test:inplace",
-    "test:inplace": "npm run test:native && npm run test:types",
+    "test:inplace": "npm run test:native && npm run test:browser && npm run test:types",
     "test:types": "tsc",
-    "test:native": "vitest run --dir tests/unit",
+    "test:native": "vitest run --config vite.node.config.ts",
+    "test:browser": "vitest run --browser.name=firefox --browser.provider=playwright --browser.headless",
     "prepublishOnly": "npm test && npm run optimize && ./assets/download-releases.sh && npm run build:bundle"
   },
   "keywords": [
@@ -64,6 +65,8 @@
     "@rollup/plugin-typescript": "11.1.2",
     "@rollup/plugin-wasm": "6.1.3",
     "@types/node": "20.4.6",
+    "@vitest/browser": "0.34.1",
+    "playwright": "1.36.2",
     "rollup": "3.27.1",
     "tslib": "2.6.1",
     "typescript": "5.1.6",

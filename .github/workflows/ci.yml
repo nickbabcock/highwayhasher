@@ -74,12 +74,6 @@ jobs:
       if: matrix.target == ''
       shell: bash
       run: npm run test:inplace
-    - name: browser test
-      working-directory: ./tests/e2e
-      if: matrix.build == 'linux-gnu'
-      run: |
-        npm install
-        npm test
     - name: Set artifact name
       shell: bash
       working-directory: dist/node

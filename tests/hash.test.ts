@@ -1,4 +1,4 @@
-const { HighwayHash, WasmHighwayHash, hasWasmSimd } = require("highwayhasher");
+import { HighwayHash, WasmHighwayHash, hasWasmSimd } from "..";
 
 // ref: https://github.com/iliakan/detect-node
 function isNode() {

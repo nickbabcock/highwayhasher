@@ -1,1 +1,0 @@
-Directory tests that wasm module is successfully used in browser environments

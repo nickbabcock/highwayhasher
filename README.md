@@ -47,9 +47,47 @@ expect(out).toEqual(expected);
 
 That's it! Now your program will use native code on nodejs and Wasm in the browser!
 
+## Quick Start (browser only)
+
+To get started without a build tool, the easiest way to reference highwayhasher in the browser is through a CDN:
+
+```html
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/highwayhasher@0.4.3/dist/browser-fat/umd/index_browser_fat.min.js"></script>
+  <script>(function() {
+    const { HighwayHash } = highwayhasher;
+    const keyData = Uint8Array.from(new Array(32).fill(1));
+    HighwayHash.loadModule().then((hasher) => {
+      const out = hasher.hash64(keyData, Uint8Array.from([0]));
+      console.log(out);
+    });
+  })();
+  </script>
+</body>
+```
+
+Or one can reference the slim endpoint to load highwayhasher more efficiently:
+
+```html
+<script type="module">
+  import { HighwayHash } from 'https://cdn.jsdelivr.net/npm/highwayhasher@0.4.3/dist/browser-slim/es/index_browser_slim.min.js';
+
+  const hasher = await HighwayHash.loadModule({
+    wasm: {
+      simd: 'https://cdn.jsdelivr.net/npm/highwayhasher@0.4.3/dist/highwayhasher_wasm_simd_bg.wasm',
+      sisd: 'https://cdn.jsdelivr.net/npm/highwayhasher@0.4.3/dist/highwayhasher_wasm_bg.wasm',
+    }
+  });
+
+  const keyData = Uint8Array.from(new Array(32).fill(1));
+  const out = hasher.hash64(keyData, Uint8Array.from([0]));
+  console.log(out);
+</script>
+```
+
 ## Non-Streaming API
 
-When executing on native hardware and the data to hash is known entirely, one can use one of the non-streaming APIs that operate more efficiently than their incremental counterparts on small data.
+When the data to hash is known entirely, one can use one of the non-streaming APIs that operate more efficiently than their incremental counterparts on small data.
 
 ```js
 import { HighwayHash } from "highwayhasher";

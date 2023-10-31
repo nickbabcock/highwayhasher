@@ -40,7 +40,7 @@ jobs:
           target: armv7-unknown-linux-gnueabihf
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Use Cross
       if: matrix.target != '' && matrix.os == 'ubuntu-latest'
       run: |
@@ -53,7 +53,7 @@ jobs:
         rustup target add ${{ matrix.target }}
         echo "TARGET=${{ matrix.target }}" >> $GITHUB_ENV
     - name: Use Node
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node }}
     - name: Install wasm-pack
@@ -89,7 +89,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/download-artifact@v3
       with:
         path: artifacts-temp

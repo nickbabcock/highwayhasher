@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [14, 18]
+        node: [18, 20]
         build:
         - win-msvc
         - macos
@@ -73,7 +73,7 @@ jobs:
     - name: npm test
       if: matrix.target == ''
       shell: bash
-      run: npm run test:inplace
+      run: npx playwright install && npm run test:inplace
     - name: Set artifact name
       shell: bash
       working-directory: dist/node

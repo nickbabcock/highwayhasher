@@ -1,3 +1,7 @@
+## v0.4.4 - 2024-04-13
+
+- Fix native hashing on arm macs
+
 ## v0.4.3 - 2023-06-30
 
 - Throughput increase of around 10%

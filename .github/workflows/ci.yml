@@ -26,10 +26,9 @@ jobs:
         - build: win-msvc
           os: windows-latest
         - build: macos
-          os: macos-11
+          os: macos-12
         - build: macos-aarch64
-          os: macos-11
-          target: aarch64-apple-darwin
+          os: macos-14
         - build: linux-gnu
           os: ubuntu-latest
         - build: linux-aarch64
@@ -57,7 +56,7 @@ jobs:
       with:
         node-version: ${{ matrix.node }}
     - name: Install wasm-pack
-      run:  npm install -g wasm-pack@0.10.1
+      run:  npm install -g wasm-pack@0.12.1
     - run: npm install
     - name: build wasm-simd
       shell: bash

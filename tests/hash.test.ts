@@ -4,7 +4,7 @@ import { HighwayHash, WasmHighwayHash, hasWasmSimd } from "..";
 function isNode() {
   return (
     Object.prototype.toString.call(
-      typeof process !== "undefined" ? process : 0
+      typeof process !== "undefined" ? process : 0,
     ) === "[object process]"
   );
 }
@@ -169,7 +169,7 @@ if (!hasWasmSimd() && isNode()) {
   // Seemingly can only catch this on node.js
   it("should throw on Wasm SIMD forced", async () => {
     await expect(WasmHighwayHash.loadModule({ simd: true })).rejects.toThrow(
-      "invalid value type 'Simd128', enable with"
+      "invalid value type 'Simd128', enable with",
     );
   });
 } else if (hasWasmSimd()) {

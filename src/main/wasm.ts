@@ -32,7 +32,7 @@ export const setWasmSimdInit = (arg: () => InitInput) => {
 };
 
 const isWasmInput = (
-  x?: HighwayLoadOptions["wasm"]
+  x?: HighwayLoadOptions["wasm"],
 ): x is WasmInput | undefined =>
   x === undefined || (typeof x === "object" && "simd" in x);
 
@@ -41,7 +41,7 @@ const isWasmInput = (
  */
 export class WasmHighwayHash {
   static async loadModule(
-    options?: Partial<HighwayLoadOptions>
+    options?: Partial<HighwayLoadOptions>,
   ): Promise<HashCreator> {
     if (isWasmInput(options?.wasm)) {
       const useSimd = options?.simd ?? hasSimd();
@@ -57,7 +57,7 @@ export class WasmHighwayHash {
 
   static async load(
     key?: Uint8Array | null | undefined,
-    options?: Partial<HighwayLoadOptions>
+    options?: Partial<HighwayLoadOptions>,
   ): Promise<IHash> {
     const module = await WasmHighwayHash.loadModule(options);
     return module.create(key);
@@ -72,7 +72,10 @@ export class WasmHighwayHash {
 const PAGE_SIZE = 65536;
 class Allocator {
   private slots: boolean[] = [];
-  constructor(public memory: WebAssembly.Memory, private offset: number) {}
+  constructor(
+    public memory: WebAssembly.Memory,
+    private offset: number,
+  ) {}
   newAllocation() {
     for (let i = 0; i < this.slots.length; i++) {
       if (this.slots[i] === false) {
@@ -118,7 +121,7 @@ function wasmHighway(alloc: Allocator, hasher: HashStrategy): HashCreator {
       const hasherSlot = hasher.new_hasher(
         offset,
         key?.byteLength ?? 0,
-        this.idx
+        this.idx,
       );
       if (hasherSlot !== this.idx) {
         throw new Error("unable to allocate hasher in slot");
@@ -237,5 +240,5 @@ export const hasSimd = () =>
     new Uint8Array([
       0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10,
       1, 8, 0, 65, 0, 253, 15, 253, 98, 11,
-    ])
+    ]),
   ));

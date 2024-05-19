@@ -29,13 +29,13 @@ const rolls = (fmt, platform, inline) => ({
     inline !== "slim" &&
       wasm(
         platform === "node"
-        ? {
-          maxFileSize: 0,
-          targetEnv: "node",
-          publicPath: "../",
-          fileName: "[name][extname]",
-        }
-          : { targetEnv: "auto-inline" }
+          ? {
+              maxFileSize: 0,
+              targetEnv: "node",
+              publicPath: "../",
+              fileName: "[name][extname]",
+            }
+          : { targetEnv: "auto-inline" },
       ),
     typescript({
       target: fmt == "es" ? "ES2022" : "ES2017",
@@ -78,11 +78,11 @@ const distributeSharedNode = () => {
   const artifact = releaseArtifact(pkg.name);
   const input = path.resolve(
     __dirname,
-    `target/${process.env.TARGET || ""}/release/${artifact}`
+    `target/${process.env.TARGET || ""}/release/${artifact}`,
   );
   const output = path.resolve(
     __dirname,
-    `dist/node/${pkg.name}-${process.env.TARGET || defaultTriple()}.node`
+    `dist/node/${pkg.name}-${process.env.TARGET || defaultTriple()}.node`,
   );
   fs.copyFileSync(input, output);
 };

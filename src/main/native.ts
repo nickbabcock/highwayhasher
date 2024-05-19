@@ -65,10 +65,12 @@ function initializeNative(native: HashModule): HashCreator {
 
 export class NativeHighwayHash {
   static async loadModule(
-    _options?: Partial<HighwayLoadOptions>
+    _options?: Partial<HighwayLoadOptions>,
   ): Promise<HashCreator> {
     if (nativeHasher === undefined) {
-      const native: HashModule = require(`./${MODULE_NAME}-${getTriple()}.node`);
+      const native: HashModule = require(
+        `./${MODULE_NAME}-${getTriple()}.node`,
+      );
       nativeHasher = initializeNative(native);
     }
 
@@ -77,7 +79,7 @@ export class NativeHighwayHash {
 
   static async load(
     key?: Uint8Array | null | undefined,
-    options?: Partial<HighwayLoadOptions>
+    options?: Partial<HighwayLoadOptions>,
   ): Promise<IHash> {
     const mod = await NativeHighwayHash.loadModule(options);
     return mod.create(key);

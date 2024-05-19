@@ -1,4 +1,5 @@
 #![no_std]
+#![allow(clippy::missing_safety_doc)]
 
 use common::{data_to_lanes, u64_slice_to_u8};
 use core::mem::MaybeUninit;
@@ -24,7 +25,7 @@ pub fn max_instances() -> usize {
 }
 
 #[wasm_bindgen]
-pub fn new_hasher(key_data_ptr: *const u8, key_len: usize, idx: usize) -> i32 {
+pub unsafe fn new_hasher(key_data_ptr: *const u8, key_len: usize, idx: usize) -> i32 {
     // We'll have the JS wrapper validate that the data is long enough
     let key_data = unsafe { core::slice::from_raw_parts(key_data_ptr, key_len) };
     let key = if key_data.is_empty() {
@@ -43,14 +44,14 @@ pub fn new_hasher(key_data_ptr: *const u8, key_len: usize, idx: usize) -> i32 {
 }
 
 #[wasm_bindgen]
-pub fn append(data_ptr: *const u8, data_len: usize, idx: usize) {
+pub unsafe fn append(data_ptr: *const u8, data_len: usize, idx: usize) {
     let data = unsafe { core::slice::from_raw_parts(data_ptr, data_len) };
     let elem = unsafe { STATES.get_unchecked_mut(idx) };
     unsafe { elem.assume_init_mut() }.append(data);
 }
 
 #[wasm_bindgen]
-pub fn finalize64(data_ptr: *mut u8, idx: usize) {
+pub unsafe fn finalize64(data_ptr: *mut u8, idx: usize) {
     let elem = unsafe { STATES.get_unchecked_mut(idx) };
     let hasher = unsafe { elem.assume_init_read() };
     let result = hasher.finalize64().to_le_bytes();
@@ -58,7 +59,7 @@ pub fn finalize64(data_ptr: *mut u8, idx: usize) {
 }
 
 #[wasm_bindgen]
-pub fn finalize128(data_ptr: *mut u8, idx: usize) {
+pub unsafe fn finalize128(data_ptr: *mut u8, idx: usize) {
     let elem = unsafe { STATES.get_unchecked_mut(idx) };
     let hasher = unsafe { elem.assume_init_read() };
     let mut out = [0u8; 16];
@@ -68,7 +69,7 @@ pub fn finalize128(data_ptr: *mut u8, idx: usize) {
 }
 
 #[wasm_bindgen]
-pub fn finalize256(data_ptr: *mut u8, idx: usize) {
+pub unsafe fn finalize256(data_ptr: *mut u8, idx: usize) {
     let elem = unsafe { STATES.get_unchecked_mut(idx) };
     let hasher = unsafe { elem.assume_init_read() };
     let mut out = [0u8; 32];

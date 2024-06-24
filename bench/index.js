@@ -33,7 +33,7 @@ function timeIt(name, dataLen, fn) {
   console.timeLog("initialize native");
 
   assert(
-    wasmMod.name != nativeMod.name,
+    WasmHighwayHash.name != HighwayHash.name,
     "expected both wasm and native module to load"
   );
 

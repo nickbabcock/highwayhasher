@@ -26,7 +26,7 @@ jobs:
         - build: win-msvc
           os: windows-latest
         - build: macos
-          os: macos-12
+          os: macos-13
         - build: macos-aarch64
           os: macos-14
         - build: linux-gnu

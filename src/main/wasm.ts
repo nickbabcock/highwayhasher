@@ -194,35 +194,41 @@ let sisdMemory: Promise<HashCreator> | undefined;
 let simdMemory: Promise<HashCreator> | undefined;
 const loadWasmSimd = async (module?: InitInput) => {
   if (simdMemory === undefined) {
-    simdMemory = simdInit(module ?? wasmSimdInit?.()).then((x) => {
-      const prevLength = x.memory.grow(1);
-      const alloc = new Allocator(x.memory, prevLength);
-      return wasmHighway(alloc, {
-        new_hasher: newSimdHighway,
-        append: simdAppend,
-        finalize64: simdFinalize64,
-        finalize128: simdFinalize128,
-        finalize256: simdFinalize256,
-      });
-    });
+    const input = module || wasmSimdInit?.();
+    simdMemory = simdInit(input ? { module_or_path: input } : undefined).then(
+      (x) => {
+        const prevLength = x.memory.grow(1);
+        const alloc = new Allocator(x.memory, prevLength);
+        return wasmHighway(alloc, {
+          new_hasher: newSimdHighway,
+          append: simdAppend,
+          finalize64: simdFinalize64,
+          finalize128: simdFinalize128,
+          finalize256: simdFinalize256,
+        });
+      },
+    );
   }
   return await simdMemory;
 };
 
 const loadWasm = async (module?: InitInput) => {
   if (sisdMemory === undefined) {
-    sisdMemory = init(module ?? wasmInit?.()).then((x) => {
-      // grow by 1 page to hold key, results, and data hashing
-      const prevLength = x.memory.grow(1);
-      const alloc = new Allocator(x.memory, prevLength);
-      return wasmHighway(alloc, {
-        new_hasher: newWasmHighway,
-        append: sisdAppend,
-        finalize64: sisdFinalize64,
-        finalize128: sisdFinalize128,
-        finalize256: sisdFinalize256,
-      });
-    });
+    const input = module || wasmInit?.();
+    sisdMemory = init(input ? { module_or_path: input } : undefined).then(
+      (x) => {
+        // grow by 1 page to hold key, results, and data hashing
+        const prevLength = x.memory.grow(1);
+        const alloc = new Allocator(x.memory, prevLength);
+        return wasmHighway(alloc, {
+          new_hasher: newWasmHighway,
+          append: sisdAppend,
+          finalize64: sisdFinalize64,
+          finalize128: sisdFinalize128,
+          finalize256: sisdFinalize256,
+        });
+      },
+    );
   }
   return await sisdMemory;
 };

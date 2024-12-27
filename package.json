@@ -62,14 +62,14 @@
   "author": "Nick Babcock <nbabcock19@hotmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-typescript": "11.1.6",
+    "@rollup/plugin-typescript": "12.1.2",
     "@rollup/plugin-wasm": "6.2.2",
-    "@types/node": "20.12.7",
-    "@vitest/browser": "1.5.0",
-    "playwright": "1.43.1",
-    "rollup": "4.14.2",
-    "tslib": "2.6.2",
-    "typescript": "5.4.5",
-    "vitest": "1.5.0"
+    "@types/node": "22.10.2",
+    "@vitest/browser": "2.1.8",
+    "playwright": "1.49.1",
+    "rollup": "4.29.1",
+    "tslib": "2.8.1",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
   }
 }

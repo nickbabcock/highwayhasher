@@ -11,9 +11,9 @@ crate-type = ["cdylib"]
 
 [dependencies]
 highway = "1.2.0"
-napi = "2"
-napi-derive = "2"
+napi = "=2.16.13"
+napi-derive = "=2.16.13"
 common = { path = "../common" }
 
 [build-dependencies]
-napi-build = "2"
+napi-build = "=2.1.4"

@@ -8,7 +8,7 @@ edition = "2018"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-wasm-bindgen = "0.2"
+wasm-bindgen = "=0.2.99"
 highway = { version = "1.2.0", default-features = false }
 common = { path = "../common" }
 

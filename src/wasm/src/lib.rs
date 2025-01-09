@@ -2,7 +2,7 @@
 #![allow(clippy::missing_safety_doc)]
 
 use common::{data_to_lanes, u64_slice_to_u8};
-use core::mem::MaybeUninit;
+use core::{mem::MaybeUninit, ptr::addr_of_mut};
 use highway::{HighwayHash, HighwayHasher, Key};
 use wasm_bindgen::prelude::*;
 
@@ -34,34 +34,45 @@ pub unsafe fn new_hasher(key_data_ptr: *const u8, key_len: usize, idx: usize) ->
         Key(data_to_lanes(key_data))
     };
 
-    match unsafe { STATES.get_mut(idx) } {
-        Some(elem) => {
-            elem.write(HighwayHasher::new(key));
-            idx as i32
-        }
-        None => -1,
+    if idx >= MAX_INSTANCES {
+        return -1;
     }
+
+    STATES[idx].write(HighwayHasher::new(key));
+    idx as i32
 }
 
 #[wasm_bindgen]
 pub unsafe fn append(data_ptr: *const u8, data_len: usize, idx: usize) {
+    if idx >= MAX_INSTANCES {
+        return;
+    }
+
     let data = unsafe { core::slice::from_raw_parts(data_ptr, data_len) };
-    let elem = unsafe { STATES.get_unchecked_mut(idx) };
-    unsafe { elem.assume_init_mut() }.append(data);
+    let elem = unsafe { addr_of_mut!(STATES[idx]) };
+    (*elem).assume_init_mut().append(data);
 }
 
 #[wasm_bindgen]
 pub unsafe fn finalize64(data_ptr: *mut u8, idx: usize) {
-    let elem = unsafe { STATES.get_unchecked_mut(idx) };
-    let hasher = unsafe { elem.assume_init_read() };
+    if idx >= MAX_INSTANCES {
+        return;
+    }
+
+    let elem = unsafe { addr_of_mut!(STATES[idx]) };
+    let hasher = unsafe { (*elem).assume_init_read() };
     let result = hasher.finalize64().to_le_bytes();
     unsafe { core::ptr::copy_nonoverlapping(result.as_ptr(), data_ptr, result.len()) };
 }
 
 #[wasm_bindgen]
 pub unsafe fn finalize128(data_ptr: *mut u8, idx: usize) {
-    let elem = unsafe { STATES.get_unchecked_mut(idx) };
-    let hasher = unsafe { elem.assume_init_read() };
+    if idx >= MAX_INSTANCES {
+        return;
+    }
+
+    let elem = unsafe { addr_of_mut!(STATES[idx]) };
+    let hasher = unsafe { (*elem).assume_init_read() };
     let mut out = [0u8; 16];
     let result = hasher.finalize128();
     u64_slice_to_u8(&mut out, &result);
@@ -70,8 +81,12 @@ pub unsafe fn finalize128(data_ptr: *mut u8, idx: usize) {
 
 #[wasm_bindgen]
 pub unsafe fn finalize256(data_ptr: *mut u8, idx: usize) {
-    let elem = unsafe { STATES.get_unchecked_mut(idx) };
-    let hasher = unsafe { elem.assume_init_read() };
+    if idx >= MAX_INSTANCES {
+        return;
+    }
+
+    let elem = unsafe { addr_of_mut!(STATES[idx]) };
+    let hasher = unsafe { (*elem).assume_init_read() };
     let mut out = [0u8; 32];
     let result = hasher.finalize256();
     u64_slice_to_u8(&mut out, &result);

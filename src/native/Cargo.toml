@@ -10,7 +10,7 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-highway = "1.2.0"
+highway = "1.3.0"
 napi = "=2.16.13"
 napi-derive = "=2.16.13"
 common = { path = "../common" }

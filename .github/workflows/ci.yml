@@ -78,7 +78,8 @@ jobs:
       working-directory: dist/node
       run: |
         echo "ARTIFACT_NAME=$(echo highwayhasher*.node)" >> $GITHUB_ENV
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
+      if: matrix.node == 20
       with:
         path: dist/node/highwayhasher*.node
         name: ${{ env.ARTIFACT_NAME }}
@@ -89,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         path: artifacts-temp
     - name: Flatten artifacts

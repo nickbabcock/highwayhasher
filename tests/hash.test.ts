@@ -213,3 +213,19 @@ if (isNode()) {
     expect(out).toEqual(expected);
   });
 }
+
+it("throwing exceptions shouldn't deplete available hashers", async () => {
+  const mod = await WasmHighwayHash.loadModule();
+
+  for (let i = 0; i < 1000; i++) {
+    try {
+      mod.create();
+      throw new Error("oh no");
+    } catch (ex) {}
+  }
+
+  const hash = mod.create();
+  let out = hash.finalize64();
+  let expected = Uint8Array.from([105, 68, 213, 185, 117, 218, 53, 112]);
+  expect(out).toEqual(expected);
+});

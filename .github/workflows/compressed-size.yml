@@ -8,14 +8,7 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
     - uses: jdx/mise-action@v2
-      with:
-        mise_toml: |
-          [tools]
-          "ubi:rustwasm/wasm-bindgen" = { version = "0.2.99", extract_all = "true" }
-          "ubi:WebAssembly/binaryen" = { version = "version_123", extract_all = "true", bin_path = "bin" }
     - run: rustup target add wasm32-unknown-unknown
-    - name: Install wasm-pack
-      run:  curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh 
     - uses: preactjs/compressed-size-action@v2
       with:
        build-script: "compressed-size"

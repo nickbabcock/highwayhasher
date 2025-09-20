@@ -122,3 +122,5 @@ dist
 .pnp.*
 
 *.node
+*/main/wasm/
+*/main/wasm-simd/

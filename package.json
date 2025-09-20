@@ -38,20 +38,16 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist/ && npm run build:wasm && npm run build:wasm-simd && npm run build:native && npm run build:bundle",
+    "build": "rm -rf dist/ && mise run build:wasm && npm run build:native && npm run build:bundle",
     "build:native": "bash ./assets/build-native.sh",
-    "build:wasm": "wasm-pack build -t web --out-dir ../main/wasm src/wasm",
-    "build:wasm-simd": "RUSTFLAGS='-C target-feature=+simd128' npm run build:wasm-simd-ci",
-    "build:wasm-simd-ci": "wasm-pack build -t web --out-name highwayhasher_wasm_simd --out-dir ../main/wasm-simd src/wasm",
     "build:bundle": "rollup -c --bundleConfigAsCjs",
     "compressed-size": "npm run build && find dist -iname '*.js' -exec npx terser@latest --compress --mangle --output {} -- {} \\;",
-    "optimize": "wasm-opt -Os src/main/wasm/highwayhasher_wasm_bg.wasm -o tmp.wasm && mv tmp.wasm src/main/wasm/highwayhasher_wasm_bg.wasm && wasm-opt --enable-simd -Os src/main/wasm-simd/highwayhasher_wasm_simd_bg.wasm -o tmp.wasm && mv tmp.wasm src/main/wasm-simd/highwayhasher_wasm_simd_bg.wasm",
     "test": "npm run build && npm run test:inplace",
     "test:inplace": "npm run test:native && npm run test:browser && npm run test:types",
     "test:types": "tsc",
     "test:native": "vitest run --config vite.node.config.ts",
     "test:browser": "vitest run --browser.name=firefox --browser.provider=playwright --browser.headless",
-    "prepublishOnly": "npm test && npm run optimize && ./assets/download-releases.sh && npm run build:bundle"
+    "prepublishOnly": "npm test && ./assets/download-releases.sh && npm run build:bundle"
   },
   "keywords": [
     "highwayhash",

@@ -40,6 +40,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - uses: jdx/mise-action@v2
+    - run: rustup target add wasm32-unknown-unknown
     - name: Use Cross
       if: matrix.target != '' && matrix.os == 'ubuntu-latest'
       run: |
@@ -55,18 +57,11 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node }}
-    - name: Install wasm-pack
-      run:  npm install -g wasm-pack@0.12.1
     - run: npm install
-    - name: build wasm-simd
-      shell: bash
-      run: npm run build:wasm-simd-ci
-      env:
-        RUSTFLAGS: '-C target-feature=+simd128'
     - name: build
       shell: bash
       run: |
-        npm run build:wasm
+        mise run build:wasm
         npm run build:native -- ${TARGET:+--target "$TARGET"}
         npm run build:bundle
     - name: npm test

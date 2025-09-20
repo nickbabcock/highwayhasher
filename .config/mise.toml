@@ -1,0 +1,29 @@
+[tools]
+"ubi:rustwasm/wasm-bindgen" = { version = "0.2.99", extract_all = "true" }
+"ubi:WebAssembly/binaryen" = { version = "version_123", extract_all = "true", bin_path = "bin" }
+
+[tasks."build:wasm"]
+run = [
+    { task = "build:wasm:sisd" },
+    { task = "build:wasm:simd" },
+    { task = "optimize:wasm" },
+]
+
+[tasks."build:wasm:sisd"]
+run = [
+    "cargo build --target wasm32-unknown-unknown --release -p highwayhasher-wasm",
+    "wasm-bindgen --target web --out-dir src/main/wasm ./target/wasm32-unknown-unknown/release/highwayhasher_wasm.wasm"
+]
+
+[tasks."build:wasm:simd"]
+env = { RUSTFLAGS = '-C target-feature=+simd128' } 
+run = [
+    "cargo build --target wasm32-unknown-unknown --release -p highwayhasher-wasm",
+    "wasm-bindgen --target web --out-name highwayhasher_wasm_simd --out-dir src/main/wasm-simd ./target/wasm32-unknown-unknown/release/highwayhasher_wasm.wasm"
+]
+
+[tasks."optimize:wasm"]
+run = [
+    'wasm-opt --enable-bulk-memory-opt -Os -o src/main/wasm/highwayhasher_wasm_bg.wasm src/main/wasm/highwayhasher_wasm_bg.wasm',
+    'wasm-opt --enable-simd --enable-bulk-memory-opt -Os -o src/main/wasm-simd/highwayhasher_wasm_simd_bg.wasm src/main/wasm-simd/highwayhasher_wasm_simd_bg.wasm'
+]

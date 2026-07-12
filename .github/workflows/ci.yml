@@ -39,8 +39,8 @@ jobs:
           target: armv7-unknown-linux-gnueabihf
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: jdx/mise-action@v2
+    - uses: actions/checkout@v7
+    - uses: jdx/mise-action@v4
     - run: rustup target add wasm32-unknown-unknown
     - name: Use Cross
       if: matrix.target != '' && matrix.os == 'ubuntu-latest'
@@ -54,7 +54,7 @@ jobs:
         rustup target add ${{ matrix.target }}
         echo "TARGET=${{ matrix.target }}" >> $GITHUB_ENV
     - name: Use Node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ matrix.node }}
     - run: npm install
@@ -73,7 +73,7 @@ jobs:
       working-directory: dist/node
       run: |
         echo "ARTIFACT_NAME=$(echo highwayhasher*.node)" >> $GITHUB_ENV
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: matrix.node == 20
       with:
         path: dist/node/highwayhasher*.node
@@ -84,8 +84,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/download-artifact@v4
+    - uses: actions/checkout@v7
+    - uses: actions/download-artifact@v8
       with:
         path: artifacts-temp
     - name: Flatten artifacts
@@ -95,7 +95,7 @@ jobs:
         ls -lR artifacts
     - name: Create Release
       if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
-      uses: actions/github-script@v6
+      uses: actions/github-script@v9
       with:
         github-token: ${{secrets.GITHUB_TOKEN}}
         script: |

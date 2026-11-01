@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [18, 20]
+        node: [20, 22]
         build:
         - win-msvc
         - macos
@@ -28,7 +28,7 @@ jobs:
         - build: macos
           os: macos-15-intel
         - build: macos-aarch64
-          os: macos-14
+          os: macos-15
         - build: linux-gnu
           os: ubuntu-latest
         - build: linux-aarch64

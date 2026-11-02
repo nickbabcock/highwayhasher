@@ -213,3 +213,97 @@ if (isNode()) {
     expect(out).toEqual(expected);
   });
 }
+
+for (const simd of [false, true]) {
+  describe(`wasm hasher state (simd: ${simd})`, () => {
+    const load = () => WasmHighwayHash.loadModule({ simd });
+    const data = Uint8Array.from({ length: 200_000 }, (_, i) => i % 251);
+    const skipIt = it.skipIf(simd && !hasWasmSimd());
+
+    skipIt(
+      "throwing exceptions shouldn't deplete available hashers",
+      async () => {
+        const mod = await load();
+
+        for (let i = 0; i < 1000; i++) {
+          try {
+            mod.create();
+            throw new Error("oh no");
+          } catch (ex) {}
+        }
+
+        const hash = mod.create();
+        const out = hash.finalize64();
+        const expected = Uint8Array.from([
+          105, 68, 213, 185, 117, 218, 53, 112,
+        ]);
+        expect(out).toEqual(expected);
+      },
+    );
+
+    skipIt(
+      "unfinalized hashers shouldn't deplete available hashers",
+      async () => {
+        const mod = await load();
+        for (let i = 0; i < 10_000; i++) {
+          mod.create(keyData).append(Uint8Array.from([i & 0xff]));
+        }
+        expect(mod.create().finalize64()).toEqual(
+          Uint8Array.from([105, 68, 213, 185, 117, 218, 53, 112]),
+        );
+      },
+    );
+
+    skipIt("interleaved hashers keep separate state", async () => {
+      const mod = await load();
+      const a = mod.create(keyData);
+      const b = mod.create();
+      for (let i = 0; i < data.length; i += 1000) {
+        a.append(data.subarray(i, i + 1000));
+        b.append(data.subarray(i, i + 1000));
+      }
+      expect(a.finalize256()).toEqual(mod.hash256(keyData, data));
+      expect(b.finalize128()).toEqual(mod.hash128(null, data));
+    });
+
+    skipIt("finalize does not change the hasher", async () => {
+      const mod = await load();
+      const hash = mod.create(keyData);
+      hash.append(data);
+      const first = hash.finalize64();
+      expect(hash.finalize64()).toEqual(first);
+      expect(first).toEqual(mod.hash64(keyData, data));
+    });
+
+    skipIt(
+      "one-shot and incremental hashes agree at the page size",
+      async () => {
+        const mod = await load();
+        for (const len of [0, 1, 32, 65535, 65536, 65537]) {
+          const input = data.subarray(0, len);
+          const hash = mod.create(keyData);
+          for (let i = 0; i < len; i += 7) {
+            hash.append(input.subarray(i, i + 7));
+          }
+          expect(mod.hash64(keyData, input)).toEqual(hash.finalize64());
+          expect(mod.hash128(keyData, input)).toEqual(hash.finalize128());
+          expect(mod.hash256(keyData, input)).toEqual(hash.finalize256());
+        }
+      },
+    );
+
+    skipIt(
+      "hashers work after the module is reset and loaded again",
+      async () => {
+        const first = await load();
+        const expected = first.hash64(keyData, data);
+        const hash = first.create(keyData);
+        WasmHighwayHash.resetModule();
+        const second = await load();
+        expect(second.hash64(keyData, data)).toEqual(expected);
+        hash.append(data);
+        expect(hash.finalize64()).toEqual(expected);
+      },
+    );
+  });
+}

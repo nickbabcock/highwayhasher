@@ -7,18 +7,18 @@ import type {
 } from "./model.js";
 import { validKey } from "./common.js";
 import init, {
-  new_hasher as newWasmHighway,
-  append as sisdAppend,
-  finalize64 as sisdFinalize64,
-  finalize128 as sisdFinalize128,
-  finalize256 as sisdFinalize256,
+  checkpoint_len as sisd_checkpoint_len,
+  new_hasher as sisd_new_hasher,
+  append as sisd_append,
+  finalize as sisd_finalize,
+  hash as sisd_hash,
 } from "./wasm/highwayhasher_wasm";
 import simdInit, {
-  new_hasher as newSimdHighway,
-  append as simdAppend,
-  finalize64 as simdFinalize64,
-  finalize128 as simdFinalize128,
-  finalize256 as simdFinalize256,
+  checkpoint_len as simd_checkpoint_len,
+  new_hasher as simd_new_hasher,
+  append as simd_append,
+  finalize as simd_finalize,
+  hash as simd_hash,
 } from "./wasm-simd/highwayhasher_wasm_simd";
 
 let wasmInit: (() => InitInput) | undefined = undefined;
@@ -70,125 +70,182 @@ export class WasmHighwayHash {
 }
 
 const PAGE_SIZE = 65536;
-class Allocator {
-  private slots: boolean[] = [];
+
+/**
+ * Layout of the scratch memory that the wrapper adds to the Wasm memory:
+ *
+ * - The first page holds the hasher state, the key, and the hash result.
+ * - The second page holds the data to hash.
+ *
+ * The Wasm module does not keep hasher state between calls. Each JS hasher
+ * owns its state, so a hasher that is not finalized is garbage collected and
+ * does not hold Wasm memory.
+ */
+const SCRATCH_PAGES = 2;
+const STATE_OFFSET = 0;
+const KEY_OFFSET = 256;
+const RESULT_OFFSET = 512;
+const DATA_OFFSET = PAGE_SIZE;
+
+class Scratch {
+  readonly statePtr: number;
+  readonly keyPtr: number;
+  readonly resultPtr: number;
+  readonly dataPtr: number;
+  private view: Uint8Array;
+
   constructor(
-    public memory: WebAssembly.Memory,
-    private offset: number,
-  ) {}
-  newAllocation() {
-    for (let i = 0; i < this.slots.length; i++) {
-      if (this.slots[i] === false) {
-        this.slots[i] = true;
-        return i;
-      }
+    private memory: WebAssembly.Memory,
+    base: number,
+  ) {
+    this.statePtr = base + STATE_OFFSET;
+    this.keyPtr = base + KEY_OFFSET;
+    this.resultPtr = base + RESULT_OFFSET;
+    this.dataPtr = base + DATA_OFFSET;
+    this.view = new Uint8Array(memory.buffer);
+  }
+
+  /** A view of all Wasm memory. Make a new view if the memory grew. */
+  heap() {
+    if (this.view.buffer !== this.memory.buffer) {
+      this.view = new Uint8Array(this.memory.buffer);
     }
-
-    const result = this.slots.length;
-    this.slots.push(true);
-    return result;
+    return this.view;
   }
-
-  returnSlot(slot: number) {
-    this.slots[slot] = false;
-  }
-
-  appendBufferOffset() {
-    return this.offset;
-  }
-
-  resultBufferOffset = this.appendBufferOffset;
-  keyBufferOffset = this.resultBufferOffset;
 }
 
+/**
+ * The functions that each Wasm module (SIMD and not SIMD) exports. The
+ * `out_len` argument is the size of the hash result: 8, 16, or 32 bytes.
+ */
 interface HashStrategy {
-  new_hasher: (key_data_ptr: number, key_len: number, idx: number) => number;
-  append: (data_ptr: number, data_len: number, idx: number) => void;
-  finalize64: (data_ptr: number, idx: number) => void;
-  finalize128: (data_ptr: number, idx: number) => void;
-  finalize256: (data_ptr: number, idx: number) => void;
+  checkpoint_len: () => number;
+  new_hasher: (
+    key_data_ptr: number,
+    key_len: number,
+    state_ptr: number,
+  ) => void;
+  append: (state_ptr: number, data_ptr: number, data_len: number) => void;
+  finalize: (state_ptr: number, out_ptr: number, out_len: number) => void;
+  hash: (
+    key_data_ptr: number,
+    key_len: number,
+    data_ptr: number,
+    data_len: number,
+    out_ptr: number,
+    out_len: number,
+  ) => void;
 }
 
-function wasmHighway(alloc: Allocator, hasher: HashStrategy): HashCreator {
+function wasmHighway(scratch: Scratch, hasher: HashStrategy): HashCreator {
+  // The Wasm module gives the size of the hasher state. The state must fit
+  // before the key in the scratch memory.
+  const stateLen = hasher.checkpoint_len();
+  if (stateLen > KEY_OFFSET - STATE_OFFSET) {
+    throw new Error(`hasher state is too large: ${stateLen} bytes`);
+  }
+
   const WasmHash = class implements IHash {
-    readonly idx: number;
+    private readonly state = new Uint8Array(stateLen);
     constructor(key: Uint8Array | null | undefined) {
       key = validKey(key);
-      this.idx = alloc.newAllocation();
-      const offset = alloc.keyBufferOffset();
-      const keyDest = new Uint8Array(alloc.memory.buffer, offset);
-      keyDest.set(key ?? new Uint8Array());
-      const hasherSlot = hasher.new_hasher(
-        offset,
-        key?.byteLength ?? 0,
-        this.idx,
-      );
-      if (hasherSlot !== this.idx) {
-        throw new Error("unable to allocate hasher in slot");
-      }
+      scratch.heap().set(key, scratch.keyPtr);
+      hasher.new_hasher(scratch.keyPtr, key.length, scratch.statePtr);
+      this.saveState(scratch.heap());
+    }
+
+    private saveState(heap: Uint8Array) {
+      const start = scratch.statePtr;
+      this.state.set(heap.subarray(start, start + stateLen));
+    }
+
+    finalize(len: number): Uint8Array {
+      const heap = scratch.heap();
+      heap.set(this.state, scratch.statePtr);
+      hasher.finalize(scratch.statePtr, scratch.resultPtr, len);
+      return heap.slice(scratch.resultPtr, scratch.resultPtr + len);
     }
 
     append(data: Uint8Array) {
+      const heap = scratch.heap();
+      heap.set(this.state, scratch.statePtr);
       while (data.length != 0) {
         const toWrite = Math.min(data.length, PAGE_SIZE);
-        const source = data.subarray(0, toWrite);
-        const dataOffset = alloc.appendBufferOffset();
-        new Uint8Array(alloc.memory.buffer, dataOffset, toWrite).set(source);
-        hasher.append(dataOffset, toWrite, this.idx);
+        heap.set(
+          toWrite === data.length ? data : data.subarray(0, toWrite),
+          scratch.dataPtr,
+        );
+        hasher.append(scratch.statePtr, scratch.dataPtr, toWrite);
         data = data.subarray(toWrite);
       }
+      this.saveState(heap);
     }
 
     finalize64(): Uint8Array {
-      const resultOffset = alloc.resultBufferOffset();
-      hasher.finalize64(resultOffset, this.idx);
-      const out = new Uint8Array(alloc.memory.buffer, resultOffset, 8);
-      const result = new Uint8Array(8);
-      result.set(out);
-      alloc.returnSlot(this.idx);
-      return result;
+      return this.finalize(8);
     }
 
     finalize128(): Uint8Array {
-      const resultOffset = alloc.resultBufferOffset();
-      hasher.finalize128(resultOffset, this.idx);
-      const out = new Uint8Array(alloc.memory.buffer, resultOffset, 16);
-      const result = new Uint8Array(16);
-      result.set(out);
-      alloc.returnSlot(this.idx);
-      return result;
+      return this.finalize(16);
     }
 
     finalize256(): Uint8Array {
-      const resultOffset = alloc.resultBufferOffset();
-      hasher.finalize256(resultOffset, this.idx);
-      const out = new Uint8Array(alloc.memory.buffer, resultOffset, 32);
-      const result = new Uint8Array(32);
-      result.set(out);
-      alloc.returnSlot(this.idx);
-      return result;
+      return this.finalize(32);
     }
+  };
+
+  // Data that fits in the scratch memory is hashed in one Wasm call, with no
+  // hasher state copied to JS. Longer data uses an incremental hasher.
+  const hashData = (
+    key: Uint8Array | null | undefined,
+    data: Uint8Array,
+    len: number,
+  ): Uint8Array => {
+    if (data.length > PAGE_SIZE) {
+      const hash = new WasmHash(key);
+      hash.append(data);
+      return hash.finalize(len);
+    }
+
+    key = validKey(key);
+    const heap = scratch.heap();
+    heap.set(key, scratch.keyPtr);
+    heap.set(data, scratch.dataPtr);
+    hasher.hash(
+      scratch.keyPtr,
+      key.length,
+      scratch.dataPtr,
+      data.length,
+      scratch.resultPtr,
+      len,
+    );
+    return heap.slice(scratch.resultPtr, scratch.resultPtr + len);
   };
 
   return {
     create: (key) => new WasmHash(key),
-    hash64(key, data) {
-      const hasher = new WasmHash(key);
-      hasher.append(data);
-      return hasher.finalize64();
-    },
-    hash128(key, data) {
-      const hasher = new WasmHash(key);
-      hasher.append(data);
-      return hasher.finalize128();
-    },
-    hash256(key, data) {
-      const hasher = new WasmHash(key);
-      hasher.append(data);
-      return hasher.finalize256();
-    },
+    hash64: (key, data) => hashData(key, data, 8),
+    hash128: (key, data) => hashData(key, data, 16),
+    hash256: (key, data) => hashData(key, data, 32),
   };
 }
+
+/**
+ * The scratch area of each Wasm memory. The Wasm module does not keep state
+ * between calls, so all loads of the same module can use the same scratch
+ * area. Thus, the memory does not grow again when the module is reset and
+ * loaded again.
+ */
+const scratches = new WeakMap<WebAssembly.Memory, Scratch>();
+const getScratch = (memory: WebAssembly.Memory) => {
+  let scratch = scratches.get(memory);
+  if (scratch === undefined) {
+    const prevPages = memory.grow(SCRATCH_PAGES);
+    scratch = new Scratch(memory, prevPages * PAGE_SIZE);
+    scratches.set(memory, scratch);
+  }
+  return scratch;
+};
 
 let sisdMemory: Promise<HashCreator> | undefined;
 let simdMemory: Promise<HashCreator> | undefined;
@@ -196,17 +253,14 @@ const loadWasmSimd = async (module?: InitInput) => {
   if (simdMemory === undefined) {
     const input = module || wasmSimdInit?.();
     simdMemory = simdInit(input ? { module_or_path: input } : undefined).then(
-      (x) => {
-        const prevLength = x.memory.grow(1);
-        const alloc = new Allocator(x.memory, prevLength);
-        return wasmHighway(alloc, {
-          new_hasher: newSimdHighway,
-          append: simdAppend,
-          finalize64: simdFinalize64,
-          finalize128: simdFinalize128,
-          finalize256: simdFinalize256,
-        });
-      },
+      (x) =>
+        wasmHighway(getScratch(x.memory), {
+          checkpoint_len: simd_checkpoint_len,
+          new_hasher: simd_new_hasher,
+          append: simd_append,
+          finalize: simd_finalize,
+          hash: simd_hash,
+        }),
     );
   }
   return await simdMemory;
@@ -215,19 +269,14 @@ const loadWasmSimd = async (module?: InitInput) => {
 const loadWasm = async (module?: InitInput) => {
   if (sisdMemory === undefined) {
     const input = module || wasmInit?.();
-    sisdMemory = init(input ? { module_or_path: input } : undefined).then(
-      (x) => {
-        // grow by 1 page to hold key, results, and data hashing
-        const prevLength = x.memory.grow(1);
-        const alloc = new Allocator(x.memory, prevLength);
-        return wasmHighway(alloc, {
-          new_hasher: newWasmHighway,
-          append: sisdAppend,
-          finalize64: sisdFinalize64,
-          finalize128: sisdFinalize128,
-          finalize256: sisdFinalize256,
-        });
-      },
+    sisdMemory = init(input ? { module_or_path: input } : undefined).then((x) =>
+      wasmHighway(getScratch(x.memory), {
+        checkpoint_len: sisd_checkpoint_len,
+        new_hasher: sisd_new_hasher,
+        append: sisd_append,
+        finalize: sisd_finalize,
+        hash: sisd_hash,
+      }),
     );
   }
   return await sisdMemory;

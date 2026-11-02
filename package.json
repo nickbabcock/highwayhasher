@@ -62,7 +62,7 @@
     "@rollup/plugin-wasm": "6.2.2",
     "@types/node": "22.10.2",
     "@vitest/browser": "2.1.8",
-    "playwright": "1.49.1",
+    "playwright": "1.64.1",
     "rollup": "4.29.1",
     "tslib": "2.8.1",
     "typescript": "5.7.2",
